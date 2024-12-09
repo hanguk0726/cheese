@@ -2,7 +2,7 @@ import Head from "next/head";
 import localFont from "next/font/local";
 import styles from "@/styles/Home.module.css";
 import VideoSearch from "@/components/VideoSearch";
-import VideoStatisticsInfographic from "@/components/VideoStatisticsInfographic";
+import CommitCalendar from "@/components/Heatmap";
 
 const geistSans = localFont({
     src: "./fonts/GeistVF.woff",
@@ -14,6 +14,7 @@ const geistMono = localFont({
     variable: "--font-geist-mono",
     weight: "100 900",
 });
+
 
 export default function Home() {
     return (
@@ -29,9 +30,9 @@ export default function Home() {
             >
                 <main className={styles.main}>
                     <div>
-                        {/* <VideoSearch /> */}
-                        <VideoStatisticsInfographic />
+                        <VideoSearch />
                     </div>
+
                 </main>
                 <footer className={styles.footer}>
                 </footer>
