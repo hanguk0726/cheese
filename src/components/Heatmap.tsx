@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo } from 'react';
 
 // 비디오 타입 정의
 interface Video {
@@ -66,6 +66,33 @@ const heatmapStyles = css`
     pointer-events: none;
     transform: translate(-50%, -110%);
     left: 50%;
+  }
+
+  .month-wrapper {
+    border: 2px solid transparent;
+  }
+
+  .month-wrapper.current-month {
+    border-color: #3399ff;
+    background-color: rgba(51, 153, 255, 0.05);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+
+  .year-summary {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    background-color: #f4f4f4;
+    padding: 15px;
+    border-radius: 8px;
+  }
+
+  .summary-card {
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 `;
 
@@ -154,6 +181,29 @@ const Heatmap = ({ data }: { data: Video[] }) => {
         return result;
     }, [dailyData, selectedYear, mappingField]);
 
+    // 연간 요약 데이터 계산
+    const yearSummary = useMemo(() => {
+        const summary = {
+            totalVideos: 0,
+            totalDuration: 0,
+            totalReadCount: 0,
+            categories: {} as Record<string, number>
+        };
+
+        data.forEach(video => {
+            if (new Date(video.publishDate).getFullYear() === selectedYear) {
+                summary.totalVideos++;
+                summary.totalDuration += video.duration;
+                summary.totalReadCount += video.readCount;
+
+                summary.categories[video.videoCategory] = 
+                    (summary.categories[video.videoCategory] || 0) + 1;
+            }
+        });
+
+        return summary;
+    }, [data, selectedYear]);
+
     const handleMouseEnter = (date: string) => {
         const dayData = dailyData[date];
         if (dayData) {
@@ -192,10 +242,33 @@ const Heatmap = ({ data }: { data: Video[] }) => {
                 </select>
             </div>
 
+            {/* 연간 요약 섹션 추가 */}
+            <div css={heatmapStyles} className="year-summary">
+                <div className="summary-card">
+                    <h4>Total Videos</h4>
+                    <p>{yearSummary.totalVideos}</p>
+                </div>
+                <div className="summary-card">
+                    <h4>Total Duration</h4>
+                    <p>{Math.round(yearSummary.totalDuration / 60)} mins</p>
+                </div>
+                <div className="summary-card">
+                    <h4>Total Read Count</h4>
+                    <p>{yearSummary.totalReadCount.toLocaleString()}</p>
+                </div>
+            </div>
+
             <div css={heatmapStyles}>
                 {monthsInYear.map(({ month, days }) => (
-                    <div key={month}>
-                        <h3>{months[month]}</h3>
+                    <div 
+                        key={month} 
+                        className={`month-wrapper ${month === new Date().getMonth() ? 'current-month' : ''}`}
+                    >
+                        <h3 
+                            css={{ cursor: 'default', userSelect: 'none' }}
+                        >
+                            {months[month]}
+                        </h3>
                         <div className="month-container">
                             {weekdays.map((weekday) => (
                                 <div key={weekday} className="weekday-label">{weekday}</div>
