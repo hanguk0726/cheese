@@ -1,8 +1,12 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
 import { useState, useMemo } from 'react';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import GridViewIcon from '@mui/icons-material/GridView';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
 
-// 비디오 타입 정의
+// 기존 타입 정의
 interface Video {
     videoNo: number;
     publishDate: string;
@@ -11,7 +15,19 @@ interface Video {
     videoCategory: string;
 }
 
-// 스타일 정의
+interface MonthData {
+    month: number;
+    days: {
+        date: string;
+        intensity: number;
+        hasData: boolean;
+    }[];
+}
+
+const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+// 스타일 정의 
 const heatmapStyles = css`
   display: flex;
   flex-direction: column;
@@ -69,39 +85,30 @@ const heatmapStyles = css`
   }
 
   .month-wrapper {
-    border: 2px solid transparent;
+    border: none;
+    background: none;
   }
 
-  .month-wrapper.current-month {
-    border-color: #3399ff;
-    background-color: rgba(51, 153, 255, 0.05);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  }
-
-  .year-summary {
+  .calendar-controls {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
-    background-color: #f4f4f4;
-    padding: 15px;
-    border-radius: 8px;
   }
 
-  .summary-card {
-    text-align: center;
-    padding: 10px;
-    border-radius: 5px;
-    background-color: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  .navigation-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
   }
 `;
-
-const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const Heatmap = ({ data }: { data: Video[] }) => {
     const [mappingField, setMappingField] = useState<'duration' | 'readCount'>('duration');
     const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+    const [currentMonthIndex, setCurrentMonthIndex] = useState<number>(new Date().getMonth());
+    const [viewMode, setViewMode] = useState<'slide' | 'grid'>('slide');
     const [hoveredDayData, setHoveredDayData] = useState<{
         date: string, 
         videos: Video[], 
@@ -109,18 +116,18 @@ const Heatmap = ({ data }: { data: Video[] }) => {
         totalReadCount: number
     } | null>(null);
 
-    // 강도 계산 함수 
+    // 강도 계산 함수
     const calculateIntensity = (value: number, isDuration: boolean) => {
         if (isDuration) {
-            if (value >= 7200) return 4; // 2시간 이상
-            if (value >= 3600) return 3; // 1~2시간
-            if (value >= 1800) return 2; // 30분~1시간
-            if (value > 0) return 1; // 30분 미만
+            if (value >= 7200) return 4;
+            if (value >= 3600) return 3;
+            if (value >= 1800) return 2;
+            if (value > 0) return 1;
         } else {
-            if (value >= 10000) return 4; // 10000회 이상
-            if (value >= 5000) return 3; // 5000~10000회
-            if (value >= 1000) return 2; // 1000~5000회
-            if (value > 0) return 1; // 1000회 미만
+            if (value >= 10000) return 4;
+            if (value >= 5000) return 3;
+            if (value >= 1000) return 2;
+            if (value > 0) return 1;
         }
         return 0;
     };
@@ -150,13 +157,13 @@ const Heatmap = ({ data }: { data: Video[] }) => {
 
     // 월별 데이터 생성
     const monthsInYear = useMemo(() => {
-        const result = [];
+        const result: MonthData[] = [];
         for (let month = 0; month < 12; month++) {
             const firstDay = new Date(selectedYear, month, 1);
             const lastDay = new Date(selectedYear, month + 1, 0);
             const firstDayOfWeek = (firstDay.getDay() || 7) - 1;
 
-            const days = Array(firstDayOfWeek).fill(null);
+            const days: any[] = Array(firstDayOfWeek).fill(null);
             for (let day = firstDay; day <= lastDay; day.setDate(day.getDate() + 1)) {
                 const dateString = day.toISOString().split('T')[0];
                 const dayData = dailyData[dateString];
@@ -181,29 +188,7 @@ const Heatmap = ({ data }: { data: Video[] }) => {
         return result;
     }, [dailyData, selectedYear, mappingField]);
 
-    // 연간 요약 데이터 계산
-    const yearSummary = useMemo(() => {
-        const summary = {
-            totalVideos: 0,
-            totalDuration: 0,
-            totalReadCount: 0,
-            categories: {} as Record<string, number>
-        };
-
-        data.forEach(video => {
-            if (new Date(video.publishDate).getFullYear() === selectedYear) {
-                summary.totalVideos++;
-                summary.totalDuration += video.duration;
-                summary.totalReadCount += video.readCount;
-
-                summary.categories[video.videoCategory] = 
-                    (summary.categories[video.videoCategory] || 0) + 1;
-            }
-        });
-
-        return summary;
-    }, [data, selectedYear]);
-
+    // 마우스 이벤트 핸들러
     const handleMouseEnter = (date: string) => {
         const dayData = dailyData[date];
         if (dayData) {
@@ -218,84 +203,134 @@ const Heatmap = ({ data }: { data: Video[] }) => {
         setHoveredDayData(null);
     };
 
-    return (
-        <>
-            <div css={{ marginBottom: '20px', textAlign: 'center' }}>
-                <label htmlFor="mappingField" css={{ marginRight: '10px' }}>Map By:</label>
-                <select
-                    id="mappingField"
-                    value={mappingField}
-                    onChange={(e) => setMappingField(e.target.value as 'duration' | 'readCount')}
-                >
-                    <option value="duration">Duration</option>
-                    <option value="readCount">Read Count</option>
-                </select>
-                <label htmlFor="yearSelector" css={{ marginLeft: '20px', marginRight: '10px' }}>Year:</label>
-                <select
-                    id="yearSelector"
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                >
-                    {[2022, 2023, 2024].map((year) => (
-                        <option key={year} value={year}>{year}</option>
+    // 월 네비게이션 핸들러
+    const handleNextMonth = () => {
+        setCurrentMonthIndex((prev) => (prev + 1) % 12);
+    };
+
+    const handlePrevMonth = () => {
+        setCurrentMonthIndex((prev) => (prev - 1 + 12) % 12);
+    };
+
+    // 보기 모드 토글
+    const toggleViewMode = () => {
+        setViewMode(prev => prev === 'slide' ? 'grid' : 'slide');
+    };
+
+    // 월 렌더링
+    const renderMonths = () => {
+        if (viewMode === 'slide') {
+            const monthData = monthsInYear.find(m => m.month === currentMonthIndex);
+            return monthData ? renderMonth(monthData, true) : null;
+        } else {
+            return (
+                <div css={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(4, 1fr)', 
+                    gridTemplateRows: 'repeat(3, 1fr)', 
+                    gap: '15px' 
+                }}>
+                    {monthsInYear.slice(0, 12).map(monthData => renderMonth(monthData, false))}
+                </div>
+            );
+        }
+    };
+
+    // 개별 월 렌더링
+    const renderMonth = (monthData: MonthData, isSlideMode: boolean) => {
+        return (
+            <div 
+                key={monthData.month} 
+                css={{
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                }}
+            >
+                <h3>{months[monthData.month]}</h3>
+                <div className="month-container">
+                    {weekdays.map((weekday) => (
+                        <div key={weekday} className="weekday-label">{weekday}</div>
                     ))}
-                </select>
-            </div>
-
-            {/* 연간 요약 섹션 추가 */}
-            <div css={heatmapStyles} className="year-summary">
-                <div className="summary-card">
-                    <h4>Total Videos</h4>
-                    <p>{yearSummary.totalVideos}</p>
-                </div>
-                <div className="summary-card">
-                    <h4>Total Duration</h4>
-                    <p>{Math.round(yearSummary.totalDuration / 60)} mins</p>
-                </div>
-                <div className="summary-card">
-                    <h4>Total Read Count</h4>
-                    <p>{yearSummary.totalReadCount.toLocaleString()}</p>
-                </div>
-            </div>
-
-            <div css={heatmapStyles}>
-                {monthsInYear.map(({ month, days }) => (
-                    <div 
-                        key={month} 
-                        className={`month-wrapper ${month === new Date().getMonth() ? 'current-month' : ''}`}
-                    >
-                        <h3 
-                            css={{ cursor: 'default', userSelect: 'none' }}
+                    {monthData.days.map((dayData, index) => (
+                        <div
+                            key={`${monthData.month}-${index}`}
+                            className={`day-cell ${dayData && dayData.hasData ? `${mappingField}-${dayData.intensity}` : 'empty'}`}
+                            css={dayData ? {} : { visibility: 'hidden' }}
+                            onMouseEnter={() => dayData?.hasData && handleMouseEnter(dayData.date)}
+                            onMouseLeave={handleMouseLeave}
                         >
-                            {months[month]}
-                        </h3>
-                        <div className="month-container">
-                            {weekdays.map((weekday) => (
-                                <div key={weekday} className="weekday-label">{weekday}</div>
-                            ))}
-                            {days.map((dayData, index) => (
-                                <div
-                                    key={`${month}-${index}`}
-                                    className={`day-cell ${dayData && dayData.hasData ? `${mappingField}-${dayData.intensity}` : 'empty'}`}
-                                    css={dayData ? {} : { visibility: 'hidden' }}
-                                    onMouseEnter={() => dayData?.hasData && handleMouseEnter(dayData.date)}
-                                    onMouseLeave={handleMouseLeave}
-                                >
-                                    {hoveredDayData?.date === dayData?.date && dayData?.hasData && (
-                                        <div className="tooltip">
-                                            <strong>Date:</strong> {dayData.date}<br />
-                                            <strong>Categories:</strong> {hoveredDayData?.videos.map(v => v.videoCategory).join(', ')}<br />
-                                            <strong>Total Duration:</strong> {Math.round((hoveredDayData?.totalDuration || 1) / 60)} mins<br />
-                                            <strong>Total Read Count:</strong> {hoveredDayData?.totalReadCount.toLocaleString()}
-                                        </div>
-                                    )}
+                            {hoveredDayData?.date === dayData?.date && dayData?.hasData && (
+                                <div className="tooltip">
+                                    <strong>Date:</strong> {dayData.date}<br />
+                                    <strong>Categories:</strong> {dailyData[dayData.date]?.videos.map(v => v.videoCategory).join(', ')}<br />
+                                    <strong>Total Duration:</strong> {Math.round((dailyData[dayData.date]?.totalDuration || 1) / 60)} mins<br />
+                                    <strong>Total Read Count:</strong> {dailyData[dayData.date]?.totalReadCount.toLocaleString()}
                                 </div>
-                            ))}
+                            )}
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
-        </>
+        );
+    };
+
+    // 메인 렌더링
+    return (
+        <div css={heatmapStyles}>
+            <div className="calendar-controls">
+                <div>
+                    <label htmlFor="mappingField" css={{ marginRight: '10px' }}>Map By:</label>
+                    <select
+                        id="mappingField"
+                        value={mappingField}
+                        onChange={(e) => setMappingField(e.target.value as 'duration' | 'readCount')}
+                    >
+                        <option value="duration">Duration</option>
+                        <option value="readCount">Read Count</option>
+                    </select>
+                    
+                    <label htmlFor="yearSelector" css={{ marginLeft: '20px', marginRight: '10px' }}>Year:</label>
+                    <select
+                        id="yearSelector"
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                    >
+                        {[2022, 2023, 2024].map((year) => (
+                            <option key={year} value={year}>{year}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <button 
+                        className="navigation-button" 
+                        onClick={toggleViewMode}
+                        title={viewMode === 'slide' ? 'Switch to Grid View' : 'Switch to Slide View'}
+                    >
+                        {viewMode === 'slide' ? <GridViewIcon /> : <FullscreenIcon />}
+                    </button>
+
+                    {viewMode === 'slide' && (
+                        <>
+                            <button 
+                                className="navigation-button" 
+                                onClick={handlePrevMonth}
+                            >
+                                <ChevronLeftIcon />
+                            </button>
+                            <button 
+                                className="navigation-button" 
+                                onClick={handleNextMonth}
+                            >
+                                <ChevronRightIcon />
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            {renderMonths()}
+        </div>
     );
 };
 
