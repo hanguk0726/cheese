@@ -4,17 +4,22 @@ import Chart from 'chart.js/auto';
 import styled from '@emotion/styled';
 import { IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import Spacer from '../util/Spacer';
 import Heatmap from './Heatmap';
 
 const SearchWrapper = styled.div`
   padding: 20px;
-  max-width: 600px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
 `;
 
 const Input = styled.input`
   padding: 10px;
-  margin-right: 10px;
+  margin: 0 10px;
   font-size: 24px; // 글자 크기 키우기
   width: 400px; // 입력 필드 너비 늘리기
   height: 60px; // 높이 키우기
@@ -110,6 +115,7 @@ const VideoSearch = () => {
     return (
         <SearchWrapper>
             <div>
+                <Spacer size={51} axis="horizontal" />
                 <Input
                     type="text"
                     value={keyword}

@@ -46,7 +46,7 @@ const heatmapStyles = css`
     font-size: 0.9rem;
     font-weight: bold;
     text-align: center;
-    margin-bottom: 5px;
+    margin-bottom: 20px;
     color: #555;
   }
 
@@ -93,7 +93,7 @@ const heatmapStyles = css`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-top: 20px;
   }
 
   .navigation-button {
@@ -226,8 +226,8 @@ const Heatmap = ({ data }: { data: Video[] }) => {
             return (
                 <div css={{ 
                     display: 'grid', 
-                    gridTemplateColumns: 'repeat(4, 1fr)', 
-                    gridTemplateRows: 'repeat(3, 1fr)', 
+                    gridTemplateColumns: 'repeat(3, 1fr)', 
+                    gridTemplateRows: 'repeat(4, 1fr)', 
                     gap: '15px' 
                 }}>
                     {monthsInYear.slice(0, 12).map(monthData => renderMonth(monthData, false))}
@@ -246,7 +246,7 @@ const Heatmap = ({ data }: { data: Video[] }) => {
                     backgroundColor: 'transparent',
                 }}
             >
-                <h3>{months[monthData.month]}</h3>
+                <h2   css={{ margin: '20px 0' }}>{months[monthData.month]}</h2>
                 <div className="month-container">
                     {weekdays.map((weekday) => (
                         <div key={weekday} className="weekday-label">{weekday}</div>

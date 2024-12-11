@@ -1,8 +1,8 @@
 import Head from "next/head";
 import localFont from "next/font/local";
 import styles from "@/styles/Home.module.css";
-import VideoSearch from "@/components/VideoSearch";
-import CommitCalendar from "@/components/Heatmap";
+import VideoSearch from "@/components/domain/VideoSearch";
+import CommitCalendar from "@/components/domain/Heatmap";
 
 const geistSans = localFont({
     src: "./fonts/GeistVF.woff",
