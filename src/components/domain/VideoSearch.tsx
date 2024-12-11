@@ -1,11 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { cache, Suspense, use, useEffect, useRef, useState } from 'react';
 import { BaseVideo } from 'chzzk';
-import Chart from 'chart.js/auto';
 import styled from '@emotion/styled';
 import { IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import Spacer from '../util/Spacer';
 import Heatmap from './Heatmap';
+import { useSearchParams } from 'next/navigation';
+import VideoChart from './VideoChart';
 
 const SearchWrapper = styled.div`
   padding: 20px;
@@ -36,13 +37,11 @@ const Input = styled.input`
   spellcheck: false;
 `;
 
-const ChartWrapper = styled.div`
-  margin-top: 30px;
-  border-radius: 8px;
-  padding: 20px;
-  background-color: #f8f9fa;
-`;
 
+const canvasStyle = styled.canvas`
+  max-width: 100%;
+  height: auto;
+`;
 
 const SearchButton = styled(IconButton)`
   padding: 8px;
@@ -54,8 +53,16 @@ const SearchButton = styled(IconButton)`
 const VideoSearch = () => {
     const [keyword, setKeyword] = useState('');
     const [videos, setVideos] = useState<BaseVideo[]>([]);
-    const chartRef = useRef<HTMLCanvasElement | null>(null);
 
+    const searchParams = useSearchParams()
+
+    useEffect(() => {
+        const queryKeyword = searchParams.get('keyword');
+        if (queryKeyword) {
+            setKeyword(queryKeyword);
+            if (videos.length === 0) searchVideos();
+        }
+    }, [searchParams]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
@@ -63,8 +70,9 @@ const VideoSearch = () => {
         }
     };
 
-    const searchVideos = async () => {
+    const searchVideos = cache(async () => {
         try {
+            if (!keyword) return;
             const response = await fetch(`/api/videos?keyword=${encodeURIComponent(keyword)}`);
             if (!response.ok) throw new Error('API 요청 실패');
             const data = await response.json();
@@ -72,45 +80,9 @@ const VideoSearch = () => {
         } catch (error) {
             console.error('비디오 검색 중 오류:', error);
         }
-    };
+    });
 
-    // Chart.js data configuration
-    const chartData = {
-        labels: videos.map((video) => video.videoTitle),
-        datasets: [
-            {
-                label: '조회수',
-                data: videos.map((video) => video.readCount),
-                borderColor: 'rgba(75,192,192,1)',
-                tension: 0.4,
-                fill: false,
-            },
-            {
-                label: '영상 길이 (초)',
-                data: videos.map((video) => video.duration),
-                borderColor: 'rgba(255,99,132,1)',
-                tension: 0.4,
-                fill: false,
-            },
-        ],
-    };
 
-    useEffect(() => {
-        if (chartRef.current && videos.length > 0) {
-            new Chart(chartRef.current, {
-                type: 'line',
-                data: chartData,
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                    },
-                },
-            });
-        }
-    }, [videos]);
 
     return (
         <SearchWrapper>
@@ -128,21 +100,12 @@ const VideoSearch = () => {
                 </SearchButton>
             </div>
 
-            {/* <ul>
-                {videos.map((video) => (
-                    <li key={video.videoId}>{video.videoTitle}</li>
-                ))}
-            </ul> */}
-
             {/* Display chart only if there are videos */}
             {videos.length > 0 && (
                 <div>
-                    {/* <ChartWrapper>
-                        <canvas ref={chartRef} />
-                    </ChartWrapper> */}
+                    <VideoChart videos={videos} />
 
-
-                    <Heatmap data={videos} />
+                    {/* <Heatmap data={videos} /> */}
                 </div>
             )}
         </SearchWrapper>
