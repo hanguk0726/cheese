@@ -38,11 +38,6 @@ const Input = styled.input`
 `;
 
 
-const canvasStyle = styled.canvas`
-  max-width: 100%;
-  height: auto;
-`;
-
 const SearchButton = styled(IconButton)`
   padding: 8px;
   &:hover {

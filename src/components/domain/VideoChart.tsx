@@ -60,7 +60,7 @@ const VideoChart: React.FC<ChartComponentProps> = ({ videos }) => {
                 tension: 0.4,
                 fill: true,
                 pointBackgroundColor: 'rgba(75,192,192,1)',
-                pointRadius: 3,
+                pointRadius: 4,
                 borderWidth: 2,
                 cubicInterpolationMode: 'monotone', // 올바른 타입으로 수정
             },
@@ -72,7 +72,7 @@ const VideoChart: React.FC<ChartComponentProps> = ({ videos }) => {
                 tension: 0.4,
                 fill: true,
                 pointBackgroundColor: 'rgba(255,99,132,1)',
-                pointRadius: 3,
+                pointRadius: 4,
                 borderWidth: 2,
                 cubicInterpolationMode: 'monotone',
             },
@@ -81,7 +81,30 @@ const VideoChart: React.FC<ChartComponentProps> = ({ videos }) => {
 
     const options: ChartOptions<'line'> = {
         responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+            padding: {
+                top: 20,
+                right: 20,
+                bottom: 20,
+                left: 20
+            },
+        },
         plugins: {
+            zoom: {
+                pan: {
+                    enabled: true
+                },
+                zoom: {
+                    wheel: {
+                        enabled: true,
+                    },
+                    pinch: {
+                        enabled: true
+                    },
+                    mode: 'xy',
+                }
+            },
             legend: {
                 position: 'top', // position 값을 올바른 값으로 수정
                 labels: {
@@ -122,6 +145,17 @@ const VideoChart: React.FC<ChartComponentProps> = ({ videos }) => {
             x: {
                 ticks: {
                     color: '#333',
+                    callback: function(this: any, value: string | number, index: number, ticks: any[]): string {
+                        const characterLimit = 8;
+                        const label = this.getLabelForValue(value); // 라벨 값을 가져옴
+                        
+                        if (label.length >= characterLimit) {
+                          // 라벨이 characterLimit 이상이면 자르고 '...' 추가
+                          return label.slice(0, characterLimit - 1).trim() + '...';
+                        }
+                        
+                        return label; // 길이가 넘지 않으면 그대로 반환
+                      }
                 },
             },
             y: {
@@ -142,34 +176,47 @@ const VideoChart: React.FC<ChartComponentProps> = ({ videos }) => {
     };
 
     useEffect(() => {
-        if (chartInstanceRef.current) {
-            chartInstanceRef.current.destroy();
-        }
-
-        if (chartRef.current && videos.length > 0) {
-            chartInstanceRef.current = new Chart(chartRef.current, {
-                type: 'line',
-                data: chartData,
-                options,
-            });
-        }
-
-        return () => {
+        const destroyChart = () => {
             if (chartInstanceRef.current) {
                 chartInstanceRef.current.destroy();
+                chartInstanceRef.current = null; // Make sure to nullify the chart instance after destroying it
             }
+        };
+        const loadChartWithZoom = async () => {
+            if (chartRef.current && videos.length > 0) {
+                if (typeof window !== 'undefined') {
+                    // 동적 임포트
+                    const { default: zoomPlugin } = await import('chartjs-plugin-zoom');
+
+                    // 기존 등록된 차트 모듈에 줌 플러그인 추가
+                    Chart.register(zoomPlugin);
+                    destroyChart();
+                    chartInstanceRef.current = new Chart(chartRef.current, {
+                        type: 'line',
+                        data: chartData,
+                        options,
+                    });
+                }
+            }
+        }
+
+        loadChartWithZoom();
+
+        return () => {
+            destroyChart();
         };
     }, [videos]);
 
     return (
-        <div>
+        <div
+            style={{
+                position: 'relative', // 부모 div의 크기가 바뀔 때 차트가 자동으로 조정되도록 함
+                width: '1000px', // 부모 div의 너비는 100%로 설정
+                height: '500px', // 부모 div의 높이를 고정 또는 동적으로 설정
+            }}
+        >
             <canvas
                 ref={chartRef}
-                css={css`
-          width: 100%;
-          height: 500px;
-          max-width: 1000px;
-        `}
             />
         </div>
     );
