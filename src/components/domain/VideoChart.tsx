@@ -145,6 +145,8 @@ const VideoChart: React.FC<ChartComponentProps> = ({ videos }) => {
             x: {
                 ticks: {
                     color: '#333',
+                    autoSkip: true,
+                    maxTicksLimit: 20,
                     callback: function(this: any, value: string | number, index: number, ticks: any[]): string {
                         const characterLimit = 8;
                         const label = this.getLabelForValue(value); // 라벨 값을 가져옴
