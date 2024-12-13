@@ -1,4 +1,5 @@
-import { BaseVideo, ChzzkClient } from 'chzzk';
+import { Video } from '@/model/Video';
+import { ChzzkClient } from 'chzzk';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const client = new ChzzkClient(); // API 클라이언트 초기화
@@ -24,7 +25,7 @@ const getChannelId = async (keyword: string): Promise<string | null> => {
 
 
 // 채널의 비디오 리스트를 가져오는 함수
-async function fetchAllVideos(channelId: string): Promise<BaseVideo[]> {
+async function fetchAllVideos(channelId: string): Promise<Video[]> {
     let options = DEFAULT_MANAGE_VIDEO_SEARCH_OPTIONS;
 
     let page = options.page;

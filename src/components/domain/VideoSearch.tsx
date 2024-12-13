@@ -1,5 +1,4 @@
 import React, { cache, Suspense, use, useEffect, useRef, useState } from 'react';
-import { BaseVideo } from 'chzzk';
 import styled from '@emotion/styled';
 import { IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -7,6 +6,8 @@ import Spacer from '../util/Spacer';
 import Heatmap from './Heatmap';
 import { useSearchParams } from 'next/navigation';
 import VideoChart from './VideoChart';
+import { Video } from '@/model/Video';
+import CategoryTable from './CategoryStatistics';
 
 const SearchWrapper = styled.div`
   padding: 20px;
@@ -47,7 +48,7 @@ const SearchButton = styled(IconButton)`
 
 const VideoSearch = () => {
     const [keyword, setKeyword] = useState('');
-    const [videos, setVideos] = useState<BaseVideo[]>([]);
+    const [videos, setVideos] = useState<Video[]>([]);
 
     const searchParams = useSearchParams()
 
@@ -98,7 +99,8 @@ const VideoSearch = () => {
             {/* Display chart only if there are videos */}
             {videos.length > 0 && (
                 <div>
-                    <VideoChart videos={videos} />
+                    <CategoryTable data={videos}/>
+                    {/* <VideoChart videos={videos} /> */}
 
                     {/* <Heatmap data={videos} /> */}
                 </div>
