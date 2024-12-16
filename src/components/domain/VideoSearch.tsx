@@ -40,14 +40,6 @@ const Input = styled.input`
   spellcheck: false;
 `;
 
-
-const SearchButton = styled(IconButton)`
-  padding: 8px;
-  &:hover {
-    background-color: #f5f5f5;
-  }
-`;
-
 const VideoSearch = () => {
     const [keyword, setKeyword] = useState('');
     const [videos, setVideos] = useState<Video[]>([]);
@@ -105,7 +97,6 @@ const VideoSearch = () => {
     });
 
 
-
     return (
         <SearchWrapper>
             <div>
@@ -117,9 +108,19 @@ const VideoSearch = () => {
                     placeholder="치지직 스트리머 이름을 입력해보세요."
                     onKeyDown={handleKeyDown}
                 />
-                <SearchButton onClick={searchVideos}>
-                    <SearchIcon fontSize="large" />
-                </SearchButton>
+                <IconButton
+                    onClick={searchVideos}
+                    size="large"
+                    aria-label="search"
+                    sx={{
+                        padding: '8px',
+                        '&:hover': {
+                            backgroundColor: '#f5f5f5',
+                        }
+                    }}
+                >
+                    <SearchIcon />
+                </IconButton>
             </div>
 
             {/* Display chart only if there are videos */}
