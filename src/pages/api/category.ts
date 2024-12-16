@@ -2,6 +2,8 @@
 
 import { CategoryInfo, CategoryStatistics } from "@/model/Category";
 import { Video } from "@/model/Video";
+import fetchData from "./util";
+import { NextApiRequest, NextApiResponse } from "next";
 
 // {
 //     "code": 200,
@@ -28,17 +30,19 @@ import { Video } from "@/model/Video";
 //     }
 // }
 
-async function getCategoryInfo(categories: string[]): Promise<CategoryInfo[]> {
+async function getCategoryInfo(videos: Video[]): Promise<CategoryInfo[]> {
 
     const list: CategoryInfo[] = [];
-    for (const category of categories) {
-        const response = await fetch(`https://api.chzzk.naver.com/service/v1/categories/GAME/${category}/info`);
-        if (!response.ok) {
-            console.error(`Failed to fetch category info for ${category}`);
+    for (const video of videos) {
+        console.log(video.videoCategory)
+        console.log(video.categoryType)
+        if (video.categoryType === null || video.videoCategory === null) {
+            console.log('null##')
+            console.log(video)
             continue;
-        }
-
-        const data: CategoryInfo = await response.json();
+        };
+        const response = await fetchData(`https://api.chzzk.naver.com/service/v1/categories/${video.categoryType}/${video.videoCategory}/info`, 'GET');
+        const data: CategoryInfo = response;
 
         list.push(data);
     }
@@ -53,8 +57,7 @@ async function getCategoryInfo(categories: string[]): Promise<CategoryInfo[]> {
 
 
 async function calculateCategoryStatistics(
-    videos: Video[], 
-    getCategoryInfo: (categories: string[]) => Promise<CategoryInfo[]>
+    videos: Video[],
 ): Promise<CategoryStatistics[]> {
     // 1. 카테고리별 그룹화
     const categoryGroups = videos.reduce((acc, video) => {
@@ -68,8 +71,9 @@ async function calculateCategoryStatistics(
 
     // 2. 카테고리 이미지 한 번에 가져오기
     const categories = Object.keys(categoryGroups);
-    const categoryInfoList = await getCategoryInfo(categories);
-    
+    console.log(`Fetching category info for ${categories}`);
+    const categoryInfoList = await getCategoryInfo(videos);
+
     // 3. 카테고리 이미지 매핑
     const categoryImageMap = categoryInfoList.reduce((acc, info) => {
         acc[info.content.categoryId] = info.content.posterImageUrl;
@@ -103,4 +107,29 @@ async function calculateCategoryStatistics(
 // console.log(categoryStats);
 
 
-export default { getCategoryInfo, calculateCategoryStatistics }
+// Next.js API 핸들러
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    try {
+        if (req.method !== 'POST') {
+            res.setHeader('Allow', ['POST']);
+            res.status(405).json({ error: `Method ${req.method} Not Allowed` });
+            return;
+        }
+
+        // 요청 본문에서 videos 데이터 추출
+        const { videos } = req.body;
+
+        if (!videos || !Array.isArray(videos)) {
+            res.status(400).json({ error: 'Invalid input: "videos" must be an array.' });
+            return;
+        }
+
+        // 카테고리 통계 계산
+        const data = await calculateCategoryStatistics(videos);
+
+        res.status(200).json(data);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        res.status(500).json({ error: 'Failed to fetch data.' });
+    }
+}

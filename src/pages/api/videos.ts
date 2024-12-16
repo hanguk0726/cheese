@@ -1,6 +1,7 @@
 import { Video } from '@/model/Video';
 import { ChzzkClient } from 'chzzk';
 import { NextApiRequest, NextApiResponse } from 'next';
+import fetchData from './util';
 
 const client = new ChzzkClient(); // API 클라이언트 초기화
 
@@ -40,15 +41,10 @@ async function fetchAllVideos(channelId: string): Promise<Video[]> {
         });
 
         try {
-            const response = await fetch(`https://api.chzzk.naver.com/service/v1/channels/${channelId}/videos?${params.toString()}`, {
-                method: 'GET',
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
-                    'Content-Type': 'application/json',
-                }
-            });
-            const data = await response.json();
-            console.log(data.content.data);
+            const response = await fetchData(`https://api.chzzk.naver.com/service/v1/channels/${channelId}/videos?${params.toString()}`, 'GET');
+
+            const data = response;
+            // console.log(data.content.data);
             if (data && data.content && data.content.data.length > 0) {
                 allVideos = [...allVideos, ...data.content.data]; // 데이터를 합침
                 page++; // 다음 페이지로 이동

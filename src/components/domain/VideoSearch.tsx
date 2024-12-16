@@ -8,6 +8,8 @@ import { useSearchParams } from 'next/navigation';
 import VideoChart from './VideoChart';
 import { Video } from '@/model/Video';
 import CategoryTable from './CategoryStatistics';
+import { CategoryStatistics } from '@/model/Category';
+import calculateCategoryStatistics from '@/pages/api/category';
 
 const SearchWrapper = styled.div`
   padding: 20px;
@@ -49,6 +51,7 @@ const SearchButton = styled(IconButton)`
 const VideoSearch = () => {
     const [keyword, setKeyword] = useState('');
     const [videos, setVideos] = useState<Video[]>([]);
+    const [categoryStatistics, setCategoryStatistics] = useState<CategoryStatistics[]>([]);
 
     const searchParams = useSearchParams()
 
@@ -59,6 +62,29 @@ const VideoSearch = () => {
             if (videos.length === 0) searchVideos();
         }
     }, [searchParams]);
+
+    useEffect(() => {
+        if (videos.length > 0) {
+            getCategoryStatistics();
+        }
+    }, [videos]);
+
+    const getCategoryStatistics = cache(async () => {
+        try {
+            const response = await fetch(`/api/category`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ videos }),
+            });
+            if (!response.ok) throw new Error('API 요청 실패');
+            const data = await response.json();
+            setCategoryStatistics(data);
+        } catch (error) {
+            console.error('카테고리 검색 중 오류:', error);
+        }
+    })
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
@@ -99,7 +125,9 @@ const VideoSearch = () => {
             {/* Display chart only if there are videos */}
             {videos.length > 0 && (
                 <div>
-                    <CategoryTable data={videos}/>
+                    {categoryStatistics.length > 0 &&
+                        (<CategoryTable data={categoryStatistics} />)
+                    }
                     {/* <VideoChart videos={videos} /> */}
 
                     {/* <Heatmap data={videos} /> */}
