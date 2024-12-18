@@ -92,26 +92,23 @@ const RecentSearchItem = styled.div`
 interface SearchBarProps {
   onSearch: (keyword: string) => void;
   isLoading?: boolean;
-  placeholder?: string;
+  initialKeyword?: string;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   isLoading = false,
-  placeholder
+  initialKeyword = '',
 }) => {
-  const [keyword, setKeyword] = useState('');
+  const [keyword, setKeyword] = useState(initialKeyword);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [windowWidth, setWindowWidth] = useState(0);
 
   useEffect(() => {
-    const savedSearches = localStorage.getItem('recentSearches');
-    if (savedSearches) {
-      setRecentSearches(JSON.parse(savedSearches));
-    }
-  }, []);
+    // Set initial window width
+    setWindowWidth(window.innerWidth);
 
-  useEffect(() => {
+    // Add resize listener
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
     };
@@ -120,12 +117,19 @@ const SearchBar: React.FC<SearchBarProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    const savedSearches = localStorage.getItem('recentSearches');
+    if (savedSearches) {
+      setRecentSearches(JSON.parse(savedSearches));
+    }
+  }, []);
+
   const dynamicPlaceholder = windowWidth <= 768
     ? "스트리머 검색"
     : "치지직 스트리머 이름을 입력해보세요.";
 
   const handleSearch = () => {
-    if (!keyword) return;
+    if (!keyword || keyword.trim() === '') return;
     onSearch(keyword);
     
     // Add to recent searches

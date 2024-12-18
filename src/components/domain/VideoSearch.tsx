@@ -44,7 +44,7 @@ const VideoSearch = () => {
         const queryKeyword = searchParams?.get('keyword');
         if (queryKeyword) {
             setKeyword(queryKeyword);
-            if (videos.length === 0) searchVideos();
+            if (videos.length === 0) searchVideos(queryKeyword);
         }
     }, [searchParams]);
 
@@ -73,16 +73,15 @@ const VideoSearch = () => {
 
 
 
-    const searchVideos = cache(async () => {
+    const searchVideos = cache(async (_keyword: string) => {
         try {
-            if (!keyword) return;
             setIsLoading(true);
-            const response = await fetch(`/api/videos?keyword=${encodeURIComponent(keyword)}`);
+            const response = await fetch(`/api/videos?keyword=${encodeURIComponent(_keyword)}`);
             if (!response.ok) throw new Error('API 요청 실패');
             const data = await response.json();
             setVideos(data.videos);
             
-            const newSearches = [keyword, ...recentSearches.filter(k => k !== keyword)].slice(0, 5);
+            const newSearches = [_keyword, ...recentSearches.filter(k => k !== _keyword)].slice(0, 5);
             setRecentSearches(newSearches);
             localStorage.setItem('recentSearches', JSON.stringify(newSearches));
         } catch (error) {
@@ -98,6 +97,7 @@ const VideoSearch = () => {
             <SearchBar            
                 onSearch={searchVideos}
                 isLoading={isLoading}
+                initialKeyword={keyword}
             />
                 
        
