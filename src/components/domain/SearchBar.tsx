@@ -1,40 +1,76 @@
 import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
-import { IconButton, CircularProgress, TextField } from '@mui/material';
+import { IconButton, CircularProgress } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
-const StyledTextField = styled(TextField)`
-  .MuiInputBase-root {
-    height: 60px;
-    font-size: 24px;
-    @media (max-width: 768px) {
-      height: 40px;
-      font-size: 16px;
-    }
-  }
-  .MuiInputBase-input {
-    text-align: center;me
-  }
-  width: 100%;
-  max-width: 400px;
+const Input = styled.input`
+  padding: 10px 60px;
   margin: 0 10px;
-  @media (max-width: 768px) {
-    margin: 0 5px;
+  font-size: 24px;
+  width: 500px;
+  height: 60px;
+  border: none;
+  border-bottom: 2px solid #ccc;
+  text-align: center;
+  &:focus {
+    outline: none;
+    border-bottom: 2px solid #007bff;
+    transition: border-color 0.3s ease;
   }
+  &::placeholder {
+    text-align: center;
+    color: #aaa;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip; // 플레이스홀더 잘림 방지
+  }
+  spellcheck: false;
+  @media (max-width: 768px) {
+    width: 100%; 
+    max-width: 100%;
+    height: 50px;
+    font-size: 16px;
+    padding: 10px 50px;
+    margin: 0;
+  }
+`;
+
+const SearchContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    max-width: 100%;
+    padding: 0 15px;
+  }
+`;
+
+const SearchInputWrapper = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
 `;
 
 const RecentSearches = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  justify-content: flex-start;
-  max-width: 400px;
+  justify-content: flex-start; // 왼쪽 정렬로 변경
   width: 100%;
-  padding: 0 10px;
+  max-width: 100%;
+  padding: 0 15px;
+  margin-top: 15px;
+
   @media (max-width: 768px) {
-    max-width: 100%;
-    justify-content: center;
     gap: 6px;
+    padding: 0 10px;
+    justify-content: flex-start; // 모바일에서도 왼쪽 정렬 유지
   }
 `;
 
@@ -62,10 +98,11 @@ interface SearchBarProps {
 const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   isLoading = false,
-  placeholder = "치지직 스트리머 이름을 입력해보세요."
+  placeholder
 }) => {
   const [keyword, setKeyword] = useState('');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
     const savedSearches = localStorage.getItem('recentSearches');
@@ -73,6 +110,19 @@ const SearchBar: React.FC<SearchBarProps> = ({
       setRecentSearches(JSON.parse(savedSearches));
     }
   }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const dynamicPlaceholder = windowWidth <= 768
+    ? "스트리머 검색"
+    : "치지직 스트리머 이름을 입력해보세요.";
 
   const handleSearch = () => {
     if (!keyword) return;
@@ -96,26 +146,41 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   return (
-    <div>
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-        <StyledTextField
+    <SearchContainer>
+      <SearchInputWrapper>
+        <Input
           type="text"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
-          placeholder={placeholder}
+          placeholder={dynamicPlaceholder}
           onKeyDown={handleKeyDown}
           disabled={isLoading}
+          spellCheck={false}
         />
-        <div style={{ position: 'absolute', right: '20px' }}>
+        <div style={{ 
+          position: 'absolute', 
+          right: '10px',  
+          display: 'flex', 
+          alignItems: 'center', 
+          height: '100%' 
+        }}>
           {isLoading ? (
             <CircularProgress size={24} />
           ) : (
-            <IconButton onClick={handleSearch}>
+            <IconButton 
+              onClick={handleSearch}
+              sx={{
+                padding: '10px',
+                '@media (max-width: 768px)': {
+                  padding: '12px'
+                }
+              }}
+            >
               <SearchIcon />
             </IconButton>
           )}
         </div>
-      </div>
+      </SearchInputWrapper>
 
       {recentSearches.length > 0 && (
         <RecentSearches>
@@ -129,7 +194,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           ))}
         </RecentSearches>
       )}
-    </div>
+    </SearchContainer>
   );
 };
 
