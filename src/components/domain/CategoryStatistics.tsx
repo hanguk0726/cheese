@@ -63,7 +63,7 @@ const CategoryTable = ({ data }: { data: CategoryStatistics[] }) => {
 
   const filteredAndSortedData = useMemo(() => {
     return data.filter(item =>
-      item.categoryName.toLowerCase().includes(searchQuery.toLowerCase())
+      item.categoryValue.toLowerCase().includes(searchQuery.toLowerCase())
     ).sort((a, b) => {
       const columnA = a[sortColumn];
       const columnB = b[sortColumn];
