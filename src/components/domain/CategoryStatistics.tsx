@@ -97,19 +97,22 @@ const CategoryTable = ({ data }: { data: CategoryStatistics[] }) => {
           </tr>
         </thead>
         <tbody>
-          {filteredAndSortedData.map(item => (
-            <tr key={item.categoryName}>
-              <td>
-                <img src={item.posterImageUrl} alt={item.categoryName} />
-                {item.categoryName}
-              </td>
-              <td>{item.totalVideos.toLocaleString()}</td>
-              <td>{item.totalDuration.toLocaleString()}</td>
-              <td>{item.averageDuration.toFixed(2)}</td>
-              <td>{item.totalLivePv.toLocaleString()}</td>
-              <td>{item.averageLivePv.toFixed(2)}</td>
-            </tr>
-          ))}
+          {filteredAndSortedData.map(item => {
+            // console.log('Item:', item);  
+            return (
+              <tr key={item.categoryName}>
+                <td>
+                  <img src={item.posterImageUrl} alt={item.categoryName} />
+                  {item.categoryValue}
+                </td>
+                <td>{item.totalVideos.toLocaleString()}</td>
+                <td>{item.totalDuration.toLocaleString()}</td>
+                <td>{item.averageDuration.toFixed(2)}</td>
+                <td>{item.totalLivePv.toLocaleString()}</td>
+                <td>{item.averageLivePv.toFixed(2)}</td>
+              </tr>
+            )
+          })}
         </tbody>
       </Table>
     </TableContainer>

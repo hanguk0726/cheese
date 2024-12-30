@@ -17,3 +17,9 @@ export interface CategoryStatistics {
     totalLivePv: number;
     averageLivePv: number;
 }
+
+
+export const CATEGORY_EMPTY = {
+    categoryValue: '카테고리 없음',
+    posterImageUrl: '/images/none.png',
+};

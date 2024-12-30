@@ -1,6 +1,6 @@
 //https://api.chzzk.naver.com/service/v1/categories/GAME/{{category}}/info
 
-import { CategoryInfo, CategoryStatistics } from "@/model/Category";
+import { CATEGORY_EMPTY, CategoryInfo, CategoryStatistics } from "@/model/Category";
 import { Video } from "@/model/Video";
 import fetchData from "./util";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -34,19 +34,35 @@ async function getCategoryInfo(videos: Video[]): Promise<CategoryInfo[]> {
 
     const list: CategoryInfo[] = [];
     for (const video of videos) {
-        console.log(video.videoCategory)
-        console.log(video.categoryType)
         if (video.categoryType === null || video.videoCategory === null) {
-            console.log('null##')
-            console.log(video)
+            console.log('null categoryType || videoCategory');
+            list.push({
+                content: {
+                    categoryId: video.videoCategory,
+                    posterImageUrl: CATEGORY_EMPTY.posterImageUrl,
+                    categoryValue: CATEGORY_EMPTY.categoryValue,
+                },
+            });
             continue;
         };
+        
+        if (video.posterImageUrl.length !== 0) {
+            list.push({
+                content: {
+                    categoryId: video.videoCategory,
+                    posterImageUrl: video.posterImageUrl,
+                    categoryValue: video.videoCategoryValue,
+                },
+            });
+            continue;
+        };
+
+        console.log('fetching new category info');
         const response = await fetchData(`https://api.chzzk.naver.com/service/v1/categories/${video.categoryType}/${video.videoCategory}/info`, 'GET');
         const data: CategoryInfo = response;
 
         list.push(data);
     }
-
     return list;
 }
 
@@ -74,11 +90,11 @@ async function calculateCategoryStatistics(
     console.log(`Fetching category info for ${categories}`);
     const categoryInfoList = await getCategoryInfo(videos);
 
-    // 3. 카테고리 이미지 매핑
-    const categoryImageMap = categoryInfoList.reduce((acc, info) => {
-        acc[info.content.categoryId] = info.content.posterImageUrl;
+    // 3. 카테고리 데이터 매핑
+    const categoryInfoMap = categoryInfoList.reduce((acc, info) => {
+        acc[info.content.categoryId] = info
         return acc;
-    }, {} as Record<string, string>);
+    }, {} as Record<string, CategoryInfo>);
 
     // 4. 통계 계산 및 이미지 추가
     return Object.entries(categoryGroups).map(([categoryKey, categoryVideos]) => {
@@ -87,11 +103,11 @@ async function calculateCategoryStatistics(
         const averageDuration = totalDuration / totalVideos;
         const totalLivePv = categoryVideos.reduce((sum, video) => sum + video.livePv, 0);
         const averageLivePv = totalLivePv / totalVideos;
-
+        console.log(`Processing category: ${categoryKey}`);
         return {
             categoryName: categoryKey,
-            categoryValue: categoryVideos[0].videoCategoryValue,
-            posterImageUrl: categoryImageMap[categoryKey], // 이미지 URL 추가
+            categoryValue: categoryInfoMap[categoryKey].content.categoryValue,
+            posterImageUrl: categoryInfoMap[categoryKey].content.posterImageUrl, // 이미지 URL 추가
             totalVideos,
             totalDuration,
             averageDuration,
