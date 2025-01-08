@@ -1,4 +1,4 @@
-import { Video } from '@/model/Video';
+import { Video } from '@/model/video';
 import { ChzzkClient } from 'chzzk';
 import { NextApiRequest, NextApiResponse } from 'next';
 import fetchData from './util';

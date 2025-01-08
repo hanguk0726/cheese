@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
-import { CategoryColumn, CategoryStatistics } from '@/model/Category';
+import { CategoryColumn, CategoryStatistics, CategoryStatisticsTableViewProps } from '@/model/category';
 
 
 const Wrapper = styled.div`
@@ -67,9 +67,8 @@ const TableHeader = ({ columnName, onClickColumn }: { columnName: string, onClic
     </th>
   );
 };
-
-const CategoryStatisticsTableView = ({ searchQuery, onChangeSearchQuery, data, columns, onClickColumn }:
-  { searchQuery: string, onChangeSearchQuery: (query: string) => void, data: CategoryStatistics[], columns: CategoryColumn[], onClickColumn: (columnName: keyof CategoryStatistics) => void }) => {
+//CategoryStatisticsTableViewProps
+const CategoryStatisticsTableView : React.FC<CategoryStatisticsTableViewProps> = ({ searchQuery, onChangeSearchQuery, data, columns, onClickColumn }) => {
   return (
     <Wrapper>
       <SearchInput

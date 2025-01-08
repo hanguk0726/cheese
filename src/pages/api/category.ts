@@ -1,9 +1,9 @@
 //https://api.chzzk.naver.com/service/v1/categories/GAME/{{category}}/info
 
-import { CATEGORY_EMPTY, CategoryInfo, CategoryStatistics } from "@/model/Category";
-import { Video } from "@/model/Video";
-import fetchData from "./util";
+import { CATEGORY_EMPTY, CategoryInfo, CategoryStatistics } from "@/model/category";
+import { Video } from "@/model/video";
 import { NextApiRequest, NextApiResponse } from "next";
+import fetchData from "./util";
 
 // {
 //     "code": 200,
@@ -45,7 +45,7 @@ async function getCategoryInfo(videos: Video[]): Promise<CategoryInfo[]> {
             });
             continue;
         };
-        
+
         if (video.posterImageUrl.length !== 0) {
             list.push({
                 content: {
