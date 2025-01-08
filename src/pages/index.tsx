@@ -32,7 +32,6 @@ export default function Home() {
                     <div>
                         <VideoSearch />
                     </div>
-
                 </main>
                 <footer className={styles.footer}>
                 </footer>

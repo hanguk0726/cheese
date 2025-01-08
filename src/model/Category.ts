@@ -18,7 +18,10 @@ export interface CategoryStatistics {
     averageLivePv: number;
 }
 
-
+export interface CategoryColumn {
+    name: keyof CategoryStatistics;  // 실제 데이터의 키와 일치하는 타입
+    label: string;                    // 화면에 표시될 라벨
+  }
 export const CATEGORY_EMPTY = {
     categoryValue: '카테고리 없음',
     posterImageUrl: '/images/none.png',

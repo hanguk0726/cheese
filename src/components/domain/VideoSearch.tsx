@@ -7,7 +7,7 @@ import Heatmap from './Heatmap';
 import { useSearchParams } from 'next/navigation';
 import VideoChart from './VideoChart';
 import { Video } from '@/model/Video';
-import CategoryTable from './CategoryStatistics';
+import CategoryStatisticsTable from './CategoryStatistics';
 import { CategoryStatistics } from '@/model/Category';
 import calculateCategoryStatistics from '@/pages/api/category';
 import SearchBar from './SearchBar';
@@ -130,7 +130,7 @@ const VideoSearch = () => {
             {videos.length > 0 && (
                 <div>
                     {categoryStatistics.length > 0 &&
-                        (<CategoryTable data={categoryStatistics} />)
+                        (<CategoryStatisticsTable data={categoryStatistics} />)
                     }
                     {/* <VideoChart videos={videos} /> */}
 
