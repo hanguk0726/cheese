@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, cache } from 'react';
 import styled from '@emotion/styled';
 import { IconButton, CircularProgress } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -96,20 +96,15 @@ const DeleteButton = styled(IconButton)`
   font-size: 12px;
 `;
 
-interface SearchBarProps {
-  onSearch: (keyword: string) => void;
-  isLoading?: boolean;
-  initialKeyword?: string;
-}
 
-const SearchBar: React.FC<SearchBarProps> = ({
-  onSearch,
-  isLoading = false,
-  initialKeyword = '',
-}) => {
-  const [keyword, setKeyword] = useState(initialKeyword);
+const SearchBar = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [videos, setVideos] = useState([]);
+  const [keyword, setKeyword] = useState('');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [windowWidth, setWindowWidth] = useState(0);
+
+
 
   useEffect(() => {
     // Set initial window width
@@ -131,14 +126,32 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, []);
 
+  const searchVideos = cache(async (_keyword: string) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/videos?keyword=${encodeURIComponent(_keyword)}`);
+      if (!response.ok) throw new Error('API 요청 실패');
+      const data = await response.json();
+      setVideos(data.videos);
+
+      const newSearches = [_keyword, ...recentSearches.filter(k => k !== _keyword)].slice(0, 5);
+      setRecentSearches(newSearches);
+      localStorage.setItem('recentSearches', JSON.stringify(newSearches));
+    } catch (error) {
+      console.error('비디오 검색 중 오류:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  });
+
   const dynamicPlaceholder = windowWidth <= 768
     ? "스트리머 검색"
     : "치지직 스트리머 이름을 입력해보세요.";
 
   const handleSearch = () => {
     if (!keyword || keyword.trim() === '') return;
-    onSearch(keyword);
-    
+    searchVideos(keyword);
+
     // Add to recent searches
     const newSearches = [keyword, ...recentSearches.filter(k => k !== keyword)].slice(0, 5);
     setRecentSearches(newSearches);
@@ -153,7 +166,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   const handleRecentSearchClick = (searchTerm: string) => {
     setKeyword(searchTerm);
-    onSearch(searchTerm);
+    searchVideos(searchTerm);
   };
 
   const handleDeleteRecentSearch = (searchTerm: string) => {
@@ -174,17 +187,17 @@ const SearchBar: React.FC<SearchBarProps> = ({
           disabled={isLoading}
           spellCheck={false}
         />
-        <div style={{ 
-          position: 'absolute', 
-          right: '10px',  
-          display: 'flex', 
-          alignItems: 'center', 
-          height: '100%' 
+        <div style={{
+          position: 'absolute',
+          right: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          height: '100%'
         }}>
           {isLoading ? (
             <CircularProgress size={24} />
           ) : (
-            <IconButton 
+            <IconButton
               onClick={handleSearch}
               sx={{
                 padding: '10px',
@@ -202,15 +215,15 @@ const SearchBar: React.FC<SearchBarProps> = ({
       {recentSearches.length > 0 && (
         <RecentSearches>
           {recentSearches.map((search, index) => (
-             <RecentSearchItem key={index}>
-             <span onClick={() => handleRecentSearchClick(search)}>{search}</span>
-             <DeleteButton
-               onClick={() => handleDeleteRecentSearch(search)}
-               size="small"
-             >
-               <CloseIcon fontSize="small" />
-             </DeleteButton>
-           </RecentSearchItem>
+            <RecentSearchItem key={index}>
+              <span onClick={() => handleRecentSearchClick(search)}>{search}</span>
+              <DeleteButton
+                onClick={() => handleDeleteRecentSearch(search)}
+                size="small"
+              >
+                <CloseIcon fontSize="small" />
+              </DeleteButton>
+            </RecentSearchItem>
           ))}
         </RecentSearches>
       )}
