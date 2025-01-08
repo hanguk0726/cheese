@@ -14,15 +14,12 @@ import SearchBar from './SearchBar';
 import { loadCache, saveCache } from '@/pages/util/cache';
 
 const SearchWrapper = styled.div`
-  padding: 20px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 32px;
   width: 100%;
-  max-width: 1200px;
 `;
 
 const VideoSearch = () => {
