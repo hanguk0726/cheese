@@ -4,7 +4,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import appStore from '@/data/store/app';
 import { SearchBarViewProps } from '@/model/video';
-import { observer } from 'mobx-react';
+
 
 
 const Input = styled.input`
@@ -26,6 +26,7 @@ const Input = styled.input`
     white-space: nowrap;
     overflow: visible;
     text-overflow: clip; // 플레이스홀더 잘림 방지
+    transition: opacity 0.2s ease; /* opacity 애니메이션 추가 */
   }
 
   spellcheck: false;
@@ -149,4 +150,4 @@ const SearchBarView: React.FC<SearchBarViewProps> = ({ keyword, setKeyword, plac
   );
 };
 
-export default observer(SearchBarView);
+export default SearchBarView;

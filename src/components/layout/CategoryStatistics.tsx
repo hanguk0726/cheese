@@ -67,7 +67,7 @@ const TableHeader = ({ columnName, onClickColumn }: { columnName: string, onClic
     </th>
   );
 };
-//CategoryStatisticsTableViewProps
+
 const CategoryStatisticsTableView : React.FC<CategoryStatisticsTableViewProps> = ({ searchQuery, onChangeSearchQuery, data, columns, onClickColumn }) => {
   return (
     <Wrapper>

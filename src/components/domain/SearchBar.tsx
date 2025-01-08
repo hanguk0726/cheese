@@ -2,7 +2,9 @@ import React, { useState, useEffect, cache } from 'react';
 import appStore from '@/data/store/app';
 import videoStore from '@/data/store/video';
 import SearchBarView from '../layout/SearchBar';
-
+import { observer } from 'mobx-react';
+import snackbarStore from '@/data/store/snackbar';
+import { SnackbarSeverity } from '@/model/app';
 
 const SearchBar = () => {
   const [keyword, setKeyword] = useState('');
@@ -39,7 +41,7 @@ const SearchBar = () => {
       const response = await fetch(`/api/videos?keyword=${encodeURIComponent(_keyword)}`);
       if (!response.ok) throw new Error('API 요청 실패');
       const data = await response.json();
-      videoStore.saveVideos(_keyword, data.videos)
+      videoStore.saveVideos(data.videos)
 
       const newSearches = [_keyword, ...recentSearches.filter(k => k !== _keyword)].slice(0, 5);
       setRecentSearches(newSearches);
@@ -53,7 +55,10 @@ const SearchBar = () => {
 
 
   const handleSearch = () => {
-    if (!keyword || keyword.trim() === '') return;
+    if (!keyword || keyword.trim() === '') {
+      snackbarStore.showSnackbar('검색어를 입력해주세요.', SnackbarSeverity.Info);
+      return
+    };
     searchVideos(keyword);
 
     // Add to recent searches
@@ -93,4 +98,4 @@ const SearchBar = () => {
   );
 };
 
-export default SearchBar;
+export default observer(SearchBar);

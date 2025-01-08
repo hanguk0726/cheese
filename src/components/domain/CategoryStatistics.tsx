@@ -3,10 +3,12 @@ import { CategoryColumn, CategoryStatistics } from '@/model/category';
 import CategoryStatisticsTableView from '../layout/CategoryStatistics';
 import { loadCache, saveCache } from '@/pages/util/cache';
 import { Video } from '@/model/video';
+import videoStore from '@/data/store/video';
+import { observer } from 'mobx-react';
 
 
-
-const CategoryStatisticsTable = ({ videos }: { videos: Video[] }) => {
+const CategoryStatisticsTable = () => {
+  const videos = videoStore.videos;
   const [data, setData] = useState<CategoryStatistics[] | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortColumn, setSortColumn] = useState<keyof CategoryStatistics>('totalLivePv');
@@ -43,6 +45,8 @@ const CategoryStatisticsTable = ({ videos }: { videos: Video[] }) => {
     { name: 'averageLivePv', label: 'Avg Live PV' }
   ];
 
+  if (!videos || videos.length === 0) return <span></span>;//empty
+  
   return (
     <CategoryStatisticsTableView
       searchQuery={searchQuery}
@@ -52,7 +56,6 @@ const CategoryStatisticsTable = ({ videos }: { videos: Video[] }) => {
       onClickColumn={setSortColumn}
     />
   );
-
 };
 
 
@@ -99,4 +102,4 @@ const computeCategoryStatistics = async (videos: Video[]) => {
   return [];
 };
 
-export default CategoryStatisticsTable;
+export default observer(CategoryStatisticsTable);

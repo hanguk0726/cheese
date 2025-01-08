@@ -5,6 +5,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { createEmotionCache } from '@/utils/createEmotionCache';
 import { createTheme } from '@mui/material/styles';
+import SnackbarComponent from "@/components/util/Snackbar";
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -17,6 +18,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Component {...pageProps} />
+        <SnackbarComponent />
       </ThemeProvider>
     </CacheProvider>
   );

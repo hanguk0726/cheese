@@ -1,8 +1,10 @@
+import { RecordType } from '@/model/app';
 import { makeAutoObservable } from 'mobx';
 
 class AppStore {
 
     isLoading: boolean = false;
+    recordType: RecordType = RecordType.Statistics;
 
     constructor() {
         makeAutoObservable(this);
@@ -12,6 +14,9 @@ class AppStore {
         this.isLoading = isLoading;
     }
 
+    setRecordType(recordType: RecordType) {
+        this.recordType = recordType;
+    }
 
 }
 

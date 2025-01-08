@@ -2,6 +2,11 @@ import Head from "next/head";
 import localFont from "next/font/local";
 import styles from "@/styles/Home.module.css";
 import SearchBar from "@/components/domain/SearchBar";
+import videoStore from "@/data/store/video";
+import CategoryStatisticsTable from "@/components/domain/CategoryStatistics";
+import appStore from "@/data/store/app";
+import VideoChart from "@/components/domain/VideoChart";
+import Heatmap from "@/components/domain/Heatmap";
 
 // MobX 트랜스파일러 설정 검증 코드
 if (!new class { x:any }().hasOwnProperty('x')) {
@@ -20,6 +25,11 @@ const geistMono = localFont({
 });
 
 export default function Home() {
+    const recordComponents = {
+        statistics: <CategoryStatisticsTable />,
+        chart: <span />,
+        heatmap: <span />
+    };
     return (
         <>
             <Head>
@@ -33,6 +43,7 @@ export default function Home() {
             >
                 <main className={styles.main}>
                     <SearchBar />
+                    {recordComponents[appStore.recordType]}
                 </main>
                 <footer className={styles.footer}>
                 </footer>
