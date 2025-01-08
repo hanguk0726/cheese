@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { IconButton, CircularProgress } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
+
 
 const Input = styled.input`
   padding: 10px 60px;
@@ -74,19 +76,24 @@ const RecentSearches = styled.div`
   }
 `;
 
+
 const RecentSearchItem = styled.div`
+  display: flex;
+  align-items: center;
   padding: 6px 12px;
   background-color: #f0f0f0;
-  border-radius: 16px;
+  border-radius: 32px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   &:hover {
     background-color: #e0e0e0;
   }
-  @media (max-width: 768px) {
-    padding: 4px 10px;
-    font-size: 12px;
-  }
+`;
+
+const DeleteButton = styled(IconButton)`
+  margin-left: 4px;
+  padding: 2px;
+  font-size: 12px;
 `;
 
 interface SearchBarProps {
@@ -149,6 +156,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
     onSearch(searchTerm);
   };
 
+  const handleDeleteRecentSearch = (searchTerm: string) => {
+    const updatedSearches = recentSearches.filter(search => search !== searchTerm);
+    setRecentSearches(updatedSearches);
+    localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
+  };
+
   return (
     <SearchContainer>
       <SearchInputWrapper>
@@ -189,12 +202,15 @@ const SearchBar: React.FC<SearchBarProps> = ({
       {recentSearches.length > 0 && (
         <RecentSearches>
           {recentSearches.map((search, index) => (
-            <RecentSearchItem 
-              key={index} 
-              onClick={() => handleRecentSearchClick(search)}
-            >
-              {search}
-            </RecentSearchItem>
+             <RecentSearchItem key={index}>
+             <span onClick={() => handleRecentSearchClick(search)}>{search}</span>
+             <DeleteButton
+               onClick={() => handleDeleteRecentSearch(search)}
+               size="small"
+             >
+               <CloseIcon fontSize="small" />
+             </DeleteButton>
+           </RecentSearchItem>
           ))}
         </RecentSearches>
       )}
