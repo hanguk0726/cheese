@@ -7,6 +7,7 @@ import SearchBarView from '../layout/SearchBar';
 const SearchBar = () => {
   const [keyword, setKeyword] = useState('');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [windowWidth, setWindowWidth] = useState(0);
 
   useEffect(() => {
     const savedSearches = localStorage.getItem('recentSearches');
@@ -14,6 +15,23 @@ const SearchBar = () => {
       setRecentSearches(JSON.parse(savedSearches));
     }
   }, []);
+
+  useEffect(() => {
+    // Set initial window width
+    setWindowWidth(window.innerWidth);
+
+    // Add resize listener
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const dynamicPlaceholder = windowWidth <= 768
+    ? "스트리머 검색"
+    : "치지직 스트리머 이름을 입력해보세요.";
 
   const searchVideos = cache(async (_keyword: string) => {
     try {
@@ -65,7 +83,7 @@ const SearchBar = () => {
     <SearchBarView
       keyword={keyword}
       setKeyword={setKeyword}
-      placeholder={placeholder}
+      placeholder={dynamicPlaceholder}
       handleSearch={handleSearch}
       handleKeyDown={handleKeyDown}
       handleRecentSearchClick={handleRecentSearchClick}

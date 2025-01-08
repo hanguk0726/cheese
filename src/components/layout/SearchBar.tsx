@@ -4,6 +4,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import appStore from '@/data/store/app';
 import { SearchBarViewProps } from '@/model/video';
+import { observer } from 'mobx-react';
 
 
 const Input = styled.input`
@@ -26,7 +27,13 @@ const Input = styled.input`
     overflow: visible;
     text-overflow: clip; // 플레이스홀더 잘림 방지
   }
+
   spellcheck: false;
+
+  &:focus::placeholder {
+    opacity: 0; /* 포커스 시 placeholder를 보이지 않게 함 */
+  }
+
   @media (max-width: 768px) {
     width: 100%; 
     max-width: 100%;
@@ -59,6 +66,14 @@ const SearchInputWrapper = styled.div`
   justify-content: center;
 `;
 
+const SearchButtonWrapper = styled.div`
+  position: absolute;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+`;
+
 const RecentSearches = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -75,7 +90,6 @@ const RecentSearches = styled.div`
     justify-content: flex-start; // 모바일에서도 왼쪽 정렬 유지
   }
 `;
-
 
 const RecentSearchItem = styled.div`
   display: flex;
@@ -110,40 +124,21 @@ const SearchBarView: React.FC<SearchBarViewProps> = ({ keyword, setKeyword, plac
           disabled={appStore.isLoading}
           spellCheck={false}
         />
-        <div style={{
-          position: 'absolute',
-          right: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          height: '100%'
-        }}>
+        <SearchButtonWrapper>
           {appStore.isLoading ? (
             <CircularProgress size={24} />
           ) : (
-            <IconButton
-              onClick={handleSearch}
-              sx={{
-                padding: '10px',
-                '@media (max-width: 768px)': {
-                  padding: '12px'
-                }
-              }}
-            >
-              <SearchIcon />
-            </IconButton>
+            <SearchIcon onClick={handleSearch} sx={{ cursor: 'pointer', color: 'gray', fontSize: 28 }} />
           )}
-        </div>
+        </SearchButtonWrapper>
       </SearchInputWrapper>
 
       {recentSearches.length > 0 && (
         <RecentSearches>
-          {recentSearches.map((search, index) => (
-            <RecentSearchItem key={index}>
+          {recentSearches.map((search) => (
+            <RecentSearchItem key={search}>
               <span onClick={() => handleRecentSearchClick(search)}>{search}</span>
-              <DeleteButton
-                onClick={() => handleDeleteRecentSearch(search)}
-                size="small"
-              >
+              <DeleteButton onClick={() => handleDeleteRecentSearch(search)} size="small">
                 <CloseIcon fontSize="small" />
               </DeleteButton>
             </RecentSearchItem>
@@ -154,4 +149,4 @@ const SearchBarView: React.FC<SearchBarViewProps> = ({ keyword, setKeyword, plac
   );
 };
 
-export default SearchBarView;
+export default observer(SearchBarView);
