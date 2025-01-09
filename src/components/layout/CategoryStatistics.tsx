@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
-import { CategoryColumn, CategoryStatistics, CategoryStatisticsTableViewProps } from '@/model/category';
+import { CategoryStatisticsTableViewProps } from '@/model/category';
 
 
 const Wrapper = styled.div`

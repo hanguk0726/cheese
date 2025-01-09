@@ -1,7 +1,9 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
 import React, { useRef, useEffect } from 'react';
 import { Chart, ChartData, ChartOptions, LineController, LineElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Legend, Filler } from 'chart.js';
+import { formatDate, formatDuration } from '../util/formatTime';
+import videoStore from '@/data/store/video';
+import { observer } from 'mobx-react';
 
 // Chart.js 모듈 등록
 Chart.register(
@@ -17,35 +19,8 @@ Chart.register(
 );
 
 
-// 초를 'HH:MM' 형식으로 변환하는 함수
-const formatDuration = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const formattedHours = hours < 10 ? `0${hours}` : `${hours}`;
-    const formattedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
-    return `${formattedHours}:${formattedMinutes}`;
-};
-// 'yyyy-mm-dd HH:MM:SS' 형식의 날짜를 'yyyy-mm-dd'로 변환하는 함수
-const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
-};
-
-interface Video {
-    videoTitle: string;
-    readCount: number;
-    duration: number;
-    publishDate: string;
-}
-
-interface ChartComponentProps {
-    videos: Video[];
-}
-
-const VideoChart: React.FC<ChartComponentProps> = ({ videos }) => {
+const VideoChart = () => {
+    const videos = videoStore.videos;
     const chartRef = useRef<HTMLCanvasElement | null>(null);
     const chartInstanceRef = useRef<Chart | null>(null);
 
@@ -106,9 +81,12 @@ const VideoChart: React.FC<ChartComponentProps> = ({ videos }) => {
                 }
             },
             legend: {
-                position: 'top', // position 값을 올바른 값으로 수정
+                position: 'top',
                 labels: {
                     usePointStyle: true,
+                    font: {
+                        size: 14,
+                    },
                 },
             },
             tooltip: {
@@ -147,17 +125,17 @@ const VideoChart: React.FC<ChartComponentProps> = ({ videos }) => {
                     color: '#333',
                     autoSkip: true,
                     maxTicksLimit: 20,
-                    callback: function(this: any, value: string | number, index: number, ticks: any[]): string {
+                    callback: function (this: any, value: string | number, index: number, ticks: any[]): string {
                         const characterLimit = 8;
                         const label = this.getLabelForValue(value); // 라벨 값을 가져옴
-                        
+
                         if (label.length >= characterLimit) {
-                          // 라벨이 characterLimit 이상이면 자르고 '...' 추가
-                          return label.slice(0, characterLimit - 1).trim() + '...';
+                            // 라벨이 characterLimit 이상이면 자르고 '...' 추가
+                            return label.slice(0, characterLimit - 1).trim() + '...';
                         }
-                        
+
                         return label; // 길이가 넘지 않으면 그대로 반환
-                      }
+                    }
                 },
             },
             y: {
@@ -209,6 +187,8 @@ const VideoChart: React.FC<ChartComponentProps> = ({ videos }) => {
         };
     }, [videos]);
 
+    if (!videos || videos.length === 0) return <span></span>;//empty
+
     return (
         <div
             style={{
@@ -224,4 +204,4 @@ const VideoChart: React.FC<ChartComponentProps> = ({ videos }) => {
     );
 };
 
-export default VideoChart;
+export default observer(VideoChart);

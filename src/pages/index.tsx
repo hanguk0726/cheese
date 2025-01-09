@@ -27,7 +27,7 @@ const geistMono = localFont({
 export default function Home() {
     const recordComponents = {
         statistics: <CategoryStatisticsTable />,
-        chart: <span />,
+        chart: <VideoChart />,
         heatmap: <span />
     };
     return (

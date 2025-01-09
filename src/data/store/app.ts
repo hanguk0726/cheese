@@ -4,7 +4,7 @@ import { makeAutoObservable } from 'mobx';
 class AppStore {
 
     isLoading: boolean = false;
-    recordType: RecordType = RecordType.Statistics;
+    recordType: RecordType = RecordType.Chart;
 
     constructor() {
         makeAutoObservable(this);
