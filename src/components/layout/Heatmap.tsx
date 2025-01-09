@@ -62,7 +62,7 @@ const DayCell = styled.div`
 `;
 
 const Tooltip = styled.div`
-    position: absolute;
+    position: fixed;
     z-index: 10;
     background: white;
     border: 1px solid #ccc;
@@ -71,8 +71,6 @@ const Tooltip = styled.div`
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     font-size: 0.8rem;
     pointer-events: none;
-    transform: translate(-50%, -110%);
-    left: 50%;
 `;
 
 const CalendarControls = styled.div`
@@ -115,31 +113,34 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
         const tooltipWidth = 200; // 툴팁의 예상 너비
         const tooltipHeight = 100; // 툴팁의 예상 높이
     
-        // `rect.top`은 화면의 상단 기준으로 값이 나오지만, 스크롤이 있다면 이를 고려해야 합니다.
-        let top = rect.top + window.scrollY - tooltipHeight;  // 화면 상단에서의 위치 조정
-        let left = rect.left + window.scrollX + rect.width / 2;  // 화면 왼쪽에서의 위치 조정
+        // 툴팁의 위치 계산 (스크롤을 고려하지 않음)
+        let top = rect.top - tooltipHeight;  // 화면 상단에서의 위치 조정
+        let left = rect.left + rect.width / 2 - tooltipWidth / 2;  // 화면 왼쪽에서의 위치 조정, 툴팁이 중심에 오도록 조정
     
         // 화면의 오른쪽 가장자리를 벗어나는 경우
-        if (left + tooltipWidth / 2 > window.innerWidth) {
-            left = window.innerWidth - tooltipWidth / 2;
+        if (left + tooltipWidth > window.innerWidth) {
+            left = window.innerWidth - tooltipWidth - 10;  // 화면 오른쪽에서 벗어나지 않도록 10px 여유를 두고 위치 조정
         }
     
         // 화면의 왼쪽 가장자리를 벗어나는 경우
-        if (left - tooltipWidth / 2 < 0) {
-            left = tooltipWidth / 2;
-        }
-    
-        // 화면의 위쪽 가장자리를 벗어나는 경우
-        if (top < 0) {
-            top = rect.bottom + window.scrollY + 10; // 툴팁을 아래쪽으로 이동
+        if (left < 0) {
+            left = 10;  // 화면 왼쪽에서 벗어나지 않도록 10px 여유를 두고 위치 조정
         }
     
         // 툴팁이 너무 아래로 떨어지지 않도록 화면 하단을 고려
-        if (top + tooltipHeight > window.innerHeight) {
-            top = window.innerHeight - tooltipHeight - 10; // 화면 하단 근처로 위치
+        if (top < 0) {
+            top = 10;  // 화면 상단에서 벗어나지 않도록 10px 여유를 두고 위치 조정
         }
     
+        // 툴팁이 화면 하단을 벗어나는 경우
+        if (top + tooltipHeight > window.innerHeight) {
+            top = window.innerHeight - tooltipHeight - 10;  // 화면 하단 근처로 위치
+        }
+    
+        // 툴팁 위치 업데이트
         setTooltipPosition({ top, left });
+    
+        // 툴팁이 들어가는 데이터 처리
         handleMouseEnter(date);
     };
 
