@@ -6,19 +6,24 @@ import GridViewIcon from '@mui/icons-material/GridView';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import { MonthData } from '@/model/time';
 import { HeatmapViewProps } from '@/model/heatmap';
+import styled from '@emotion/styled';
 
 
 const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+const Wrapper = styled.div`
+    width: calc(100vw - 40px);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+`;
 
 // 스타일 정의 
 const heatmapStyles = css`
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin: 0 auto;
-  position: relative;
-
+  
   .month-container {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -163,65 +168,67 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
 
     // 메인 렌더링
     return (
-        <div css={heatmapStyles}>
-            <div className="calendar-controls">
-                <div>
-                    <label htmlFor="mappingField" css={{ marginRight: '10px' }}>Map By:</label>
-                    <select
-                        id="mappingField"
-                        value={mappingField}
-                        onChange={(e) => setMappingField(e.target.value as 'duration' | 'readCount')}
-                    >
-                        <option value="duration">Duration</option>
-                        <option value="readCount">Read Count</option>
-                    </select>
+        <Wrapper>
+            <div css={heatmapStyles}>
+                <div className="calendar-controls">
+                    <div>
+                        <label htmlFor="mappingField" css={{ marginRight: '10px' }}>Map By:</label>
+                        <select
+                            id="mappingField"
+                            value={mappingField}
+                            onChange={(e) => setMappingField(e.target.value as 'duration' | 'readCount')}
+                        >
+                            <option value="duration">Duration</option>
+                            <option value="readCount">Read Count</option>
+                        </select>
 
-                    <label htmlFor="yearSelector" css={{ marginLeft: '20px', marginRight: '10px' }}>Year:</label>
-                    <select
-                        id="yearSelector"
-                        value={calendarDate.year}
-                        onChange={(e) => setCalendarDate({
-                            year: parseInt(e.target.value),
-                            monthIndex: calendarDate.monthIndex
-                        })}
-                    >
-                        {Array.from({ length: yearBounds.maxYear - yearBounds.minYear + 1 },
-                            (_, index) => yearBounds.minYear + index).map((year) => (
-                                <option key={year} value={year}>{year}</option>
-                            ))}
-                    </select>
+                        <label htmlFor="yearSelector" css={{ marginLeft: '20px', marginRight: '10px' }}>Year:</label>
+                        <select
+                            id="yearSelector"
+                            value={calendarDate.year}
+                            onChange={(e) => setCalendarDate({
+                                year: parseInt(e.target.value),
+                                monthIndex: calendarDate.monthIndex
+                            })}
+                        >
+                            {Array.from({ length: yearBounds.maxYear - yearBounds.minYear + 1 },
+                                (_, index) => yearBounds.minYear + index).map((year) => (
+                                    <option key={year} value={year}>{year}</option>
+                                ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <button
+                            className="navigation-button"
+                            onClick={toggleViewMode}
+                            title={viewMode === 'slide' ? 'Switch to Grid View' : 'Switch to Slide View'}
+                        >
+                            {viewMode === 'slide' ? <GridViewIcon /> : <FullscreenIcon />}
+                        </button>
+
+                        {viewMode === 'slide' && (
+                            <>
+                                <button
+                                    className="navigation-button"
+                                    onClick={handlePrevMonth}
+                                >
+                                    <ChevronLeftIcon />
+                                </button>
+                                <button
+                                    className="navigation-button"
+                                    onClick={handleNextMonth}
+                                >
+                                    <ChevronRightIcon />
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
 
-                <div>
-                    <button
-                        className="navigation-button"
-                        onClick={toggleViewMode}
-                        title={viewMode === 'slide' ? 'Switch to Grid View' : 'Switch to Slide View'}
-                    >
-                        {viewMode === 'slide' ? <GridViewIcon /> : <FullscreenIcon />}
-                    </button>
-
-                    {viewMode === 'slide' && (
-                        <>
-                            <button
-                                className="navigation-button"
-                                onClick={handlePrevMonth}
-                            >
-                                <ChevronLeftIcon />
-                            </button>
-                            <button
-                                className="navigation-button"
-                                onClick={handleNextMonth}
-                            >
-                                <ChevronRightIcon />
-                            </button>
-                        </>
-                    )}
-                </div>
+                {renderMonths()}
             </div>
-
-            {renderMonths()}
-        </div>
+        </Wrapper>
     );
 };
 
