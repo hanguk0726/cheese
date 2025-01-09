@@ -28,7 +28,7 @@ export default function Home() {
     const recordComponents = {
         statistics: <CategoryStatisticsTable />,
         chart: <VideoChart />,
-        heatmap: <span />
+        heatmap: <Heatmap />
     };
     return (
         <>

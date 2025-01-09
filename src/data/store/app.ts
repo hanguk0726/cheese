@@ -4,7 +4,7 @@ import { makeAutoObservable } from 'mobx';
 class AppStore {
 
     isLoading: boolean = false;
-    recordType: RecordType = RecordType.Chart;
+    recordType: RecordType = RecordType.Heatmap;
 
     constructor() {
         makeAutoObservable(this);
