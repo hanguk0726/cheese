@@ -7,6 +7,7 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import { MonthData } from '@/model/time';
 import { HeatmapViewProps } from '@/model/heatmap';
 import styled from '@emotion/styled';
+import { useRef, useState } from 'react';
 
 const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -19,6 +20,7 @@ const Wrapper = styled.div`
 
 const HeatmapContainer = styled.div<{ isGrid: boolean }>`
     width:  ${({ isGrid }) => (isGrid ? '50vw' : '30vw')};
+    min-width: ${({ isGrid }) => (isGrid ? '800px' : '500px')};
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -103,12 +105,49 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
     toggleViewMode,
     hoveredDayData,
 }) => {
+    
+    const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+    const dayCellRef = useRef<HTMLDivElement>(null);
+
+    const handleDayCellMouseEnter = (date: string, event: React.MouseEvent<HTMLDivElement>) => {
+        const dayCell = event.currentTarget;
+        const rect = dayCell.getBoundingClientRect();
+        const tooltipWidth = 200; // 툴팁의 예상 너비
+        const tooltipHeight = 100; // 툴팁의 예상 높이
+    
+        // `rect.top`은 화면의 상단 기준으로 값이 나오지만, 스크롤이 있다면 이를 고려해야 합니다.
+        let top = rect.top + window.scrollY - tooltipHeight;  // 화면 상단에서의 위치 조정
+        let left = rect.left + window.scrollX + rect.width / 2;  // 화면 왼쪽에서의 위치 조정
+    
+        // 화면의 오른쪽 가장자리를 벗어나는 경우
+        if (left + tooltipWidth / 2 > window.innerWidth) {
+            left = window.innerWidth - tooltipWidth / 2;
+        }
+    
+        // 화면의 왼쪽 가장자리를 벗어나는 경우
+        if (left - tooltipWidth / 2 < 0) {
+            left = tooltipWidth / 2;
+        }
+    
+        // 화면의 위쪽 가장자리를 벗어나는 경우
+        if (top < 0) {
+            top = rect.bottom + window.scrollY + 10; // 툴팁을 아래쪽으로 이동
+        }
+    
+        // 툴팁이 너무 아래로 떨어지지 않도록 화면 하단을 고려
+        if (top + tooltipHeight > window.innerHeight) {
+            top = window.innerHeight - tooltipHeight - 10; // 화면 하단 근처로 위치
+        }
+    
+        setTooltipPosition({ top, left });
+        handleMouseEnter(date);
+    };
 
     // 월 렌더링
     const renderMonths = () => {
         if (viewMode === 'slide') {
             const monthData = monthsInYear.find(m => m.month === calendarDate.monthIndex);
-            return monthData ? renderMonth(monthData, true) : null;
+            return monthData ? renderMonth(monthData) : null;
         } else {
             return (
                 <div
@@ -119,14 +158,14 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
                         gap: '15px',
                     }}
                 >
-                    {monthsInYear.slice(0, 12).map((monthData) => renderMonth(monthData, false))}
+                    {monthsInYear.slice(0, 12).map((monthData) => renderMonth(monthData))}
                 </div>
             );
         }
     };
 
     // 개별 월 렌더링
-    const renderMonth = (monthData: MonthData, isSlideMode: boolean) => {
+    const renderMonth = (monthData: MonthData) => {
         return (
             <div
                 key={monthData.month}
@@ -149,11 +188,18 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
                                     : 'empty'
                             }
                             css={dayData ? {} : { visibility: 'hidden' }}
-                            onMouseEnter={() => dayData?.hasData && handleMouseEnter(dayData.date)}
+                            onMouseEnter={(event) => dayData?.hasData && handleDayCellMouseEnter(dayData.date, event)}
                             onMouseLeave={handleMouseLeave}
+                            ref={dayCellRef}
                         >
                             {hoveredDayData?.date === dayData?.date && dayData?.hasData && (
-                                <Tooltip>
+                                <Tooltip
+                                    css={{
+                                        position: 'fixed',
+                                        top: tooltipPosition.top,
+                                        left: tooltipPosition.left,
+                                    }}
+                                >
                                     <strong>Date:</strong> {dayData.date}
                                     <br />
                                     <strong>Categories:</strong>{' '}
