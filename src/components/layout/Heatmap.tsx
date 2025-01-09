@@ -8,37 +8,38 @@ import { MonthData } from '@/model/time';
 import { HeatmapViewProps } from '@/model/heatmap';
 import styled from '@emotion/styled';
 
-
 const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const Wrapper = styled.div`
-    width: calc(100vw - 40px);
     overflow-x: auto;
+    margin: 0 auto;
     -webkit-overflow-scrolling: touch;
 `;
 
-// 스타일 정의 
-const heatmapStyles = css`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  
-  .month-container {
+const HeatmapContainer = styled.div<{ isGrid: boolean }>`
+    width:  ${({ isGrid }) => (isGrid ? '50vw' : '30vw')};
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+`;
+
+const MonthContainer = styled.div`
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 2px;
-  }
+`;
 
-  .weekday-label {
+const WeekdayLabel = styled.div`
     font-size: 0.9rem;
     font-weight: bold;
     text-align: center;
     margin-bottom: 20px;
     color: #555;
-  }
+`;
 
-  .day-cell {
+const DayCell = styled.div`
     width: 100%;
     aspect-ratio: 1 / 1;
     background-color: #e0e0e0;
@@ -46,50 +47,44 @@ const heatmapStyles = css`
     transition: background-color 0.3s ease;
     position: relative;
     cursor: help;
-  }
 
-  .day-cell.readCount-1 { background-color: #ffe6e6; }
-  .day-cell.readCount-2 { background-color: #ff9999; }
-  .day-cell.readCount-3 { background-color: #ff4d4d; }
-  .day-cell.readCount-4 { background-color: #b30000; }
+    &.readCount-1 { background-color: #ffe6e6; }
+    &.readCount-2 { background-color: #ff9999; }
+    &.readCount-3 { background-color: #ff4d4d; }
+    &.readCount-4 { background-color: #b30000; }
 
-  .day-cell.duration-1 { background-color: #e6f7ff; }
-  .day-cell.duration-2 { background-color: #85d4ff; }
-  .day-cell.duration-3 { background-color: #3399ff; }
-  .day-cell.duration-4 { background-color: #003d99; }
+    &.duration-1 { background-color: #e6f7ff; }
+    &.duration-2 { background-color: #85d4ff; }
+    &.duration-3 { background-color: #3399ff; }
+    &.duration-4 { background-color: #003d99; }
+`;
 
-  .tooltip {
+const Tooltip = styled.div`
     position: absolute;
     z-index: 10;
     background: white;
     border: 1px solid #ccc;
     border-radius: 4px;
     padding: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     font-size: 0.8rem;
     pointer-events: none;
     transform: translate(-50%, -110%);
     left: 50%;
-  }
+`;
 
-  .month-wrapper {
-    border: none;
-    background: none;
-  }
-
-  .calendar-controls {
+const CalendarControls = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: 20px;
-  }
+`;
 
-  .navigation-button {
+const NavigationButton = styled.button`
     background: none;
     border: none;
     cursor: pointer;
     padding: 8px;
-  }
 `;
 
 const HeatmapView: React.FC<HeatmapViewProps> = ({
@@ -116,13 +111,15 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
             return monthData ? renderMonth(monthData, true) : null;
         } else {
             return (
-                <div css={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gridTemplateRows: 'repeat(4, 1fr)',
-                    gap: '15px'
-                }}>
-                    {monthsInYear.slice(0, 12).map(monthData => renderMonth(monthData, false))}
+                <div
+                    css={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gridTemplateRows: 'repeat(4, 1fr)',
+                        gap: '15px',
+                    }}
+                >
+                    {monthsInYear.slice(0, 12).map((monthData) => renderMonth(monthData, false))}
                 </div>
             );
         }
@@ -139,29 +136,42 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
                 }}
             >
                 <h2 css={{ margin: '20px 0' }}>{months[monthData.month]}</h2>
-                <div className="month-container">
+                <MonthContainer>
                     {weekdays.map((weekday) => (
-                        <div key={weekday} className="weekday-label">{weekday}</div>
+                        <WeekdayLabel key={weekday}>{weekday}</WeekdayLabel>
                     ))}
                     {monthData.days.map((dayData, index) => (
-                        <div
+                        <DayCell
                             key={`${monthData.month}-${index}`}
-                            className={`day-cell ${dayData && dayData.hasData ? `${mappingField}-${dayData.intensity}` : 'empty'}`}
+                            className={
+                                dayData && dayData.hasData
+                                    ? `${mappingField}-${dayData.intensity}`
+                                    : 'empty'
+                            }
                             css={dayData ? {} : { visibility: 'hidden' }}
                             onMouseEnter={() => dayData?.hasData && handleMouseEnter(dayData.date)}
                             onMouseLeave={handleMouseLeave}
                         >
                             {hoveredDayData?.date === dayData?.date && dayData?.hasData && (
-                                <div className="tooltip">
-                                    <strong>Date:</strong> {dayData.date}<br />
-                                    <strong>Categories:</strong> {dailyData[dayData.date]?.videos.map(v => v.videoCategory).join(', ')}<br />
-                                    <strong>Total Duration:</strong> {Math.round((dailyData[dayData.date]?.totalDuration || 1) / 60)} mins<br />
-                                    <strong>Total Read Count:</strong> {dailyData[dayData.date]?.totalReadCount.toLocaleString()}
-                                </div>
+                                <Tooltip>
+                                    <strong>Date:</strong> {dayData.date}
+                                    <br />
+                                    <strong>Categories:</strong>{' '}
+                                    {dailyData[dayData.date]?.videos
+                                        .map((v) => v.videoCategory)
+                                        .join(', ')}
+                                    <br />
+                                    <strong>Total Duration:</strong>{' '}
+                                    {Math.round((dailyData[dayData.date]?.totalDuration || 1) / 60)}{' '}
+                                    mins
+                                    <br />
+                                    <strong>Total Read Count:</strong>{' '}
+                                    {dailyData[dayData.date]?.totalReadCount.toLocaleString()}
+                                </Tooltip>
                             )}
-                        </div>
+                        </DayCell>
                     ))}
-                </div>
+                </MonthContainer>
             </div>
         );
     };
@@ -169,65 +179,87 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
     // 메인 렌더링
     return (
         <Wrapper>
-            <div css={heatmapStyles}>
-                <div className="calendar-controls">
+            <HeatmapContainer isGrid={viewMode === 'grid'}>
+                <CalendarControls>
                     <div>
-                        <label htmlFor="mappingField" css={{ marginRight: '10px' }}>Map By:</label>
+                        <label htmlFor="mappingField" css={{ marginRight: '10px' }}>
+                            Map By:
+                        </label>
                         <select
                             id="mappingField"
                             value={mappingField}
-                            onChange={(e) => setMappingField(e.target.value as 'duration' | 'readCount')}
+                            onChange={(e) =>
+                                setMappingField(e.target.value as 'duration' | 'readCount')
+                            }
                         >
                             <option value="duration">Duration</option>
                             <option value="readCount">Read Count</option>
                         </select>
 
-                        <label htmlFor="yearSelector" css={{ marginLeft: '20px', marginRight: '10px' }}>Year:</label>
+                        <label
+                            htmlFor="yearSelector"
+                            css={{ marginLeft: '20px', marginRight: '10px' }}
+                        >
+                            Year:
+                        </label>
                         <select
                             id="yearSelector"
                             value={calendarDate.year}
-                            onChange={(e) => setCalendarDate({
-                                year: parseInt(e.target.value),
-                                monthIndex: calendarDate.monthIndex
-                            })}
+                            onChange={(e) =>
+                                setCalendarDate({
+                                    year: parseInt(e.target.value),
+                                    monthIndex: calendarDate.monthIndex,
+                                })
+                            }
                         >
-                            {Array.from({ length: yearBounds.maxYear - yearBounds.minYear + 1 },
-                                (_, index) => yearBounds.minYear + index).map((year) => (
-                                    <option key={year} value={year}>{year}</option>
-                                ))}
+                            {Array.from(
+                                {
+                                    length:
+                                        yearBounds.maxYear -
+                                        yearBounds.minYear +
+                                        1,
+                                },
+                                (_, index) =>
+                                    yearBounds.minYear + index
+                            ).map((year) => (
+                                <option key={year} value={year}>
+                                    {year}
+                                </option>
+                            ))}
                         </select>
                     </div>
 
                     <div>
-                        <button
-                            className="navigation-button"
+                        <NavigationButton
                             onClick={toggleViewMode}
-                            title={viewMode === 'slide' ? 'Switch to Grid View' : 'Switch to Slide View'}
+                            title={
+                                viewMode === 'slide'
+                                    ? 'Switch to Grid View'
+                                    : 'Switch to Slide View'
+                            }
                         >
-                            {viewMode === 'slide' ? <GridViewIcon /> : <FullscreenIcon />}
-                        </button>
+                            {viewMode === 'slide' ? (
+                                <GridViewIcon />
+                            ) : (
+                                <FullscreenIcon />
+                            )}
+                        </NavigationButton>
 
                         {viewMode === 'slide' && (
                             <>
-                                <button
-                                    className="navigation-button"
-                                    onClick={handlePrevMonth}
-                                >
+                                <NavigationButton onClick={handlePrevMonth}>
                                     <ChevronLeftIcon />
-                                </button>
-                                <button
-                                    className="navigation-button"
-                                    onClick={handleNextMonth}
-                                >
+                                </NavigationButton>
+                                <NavigationButton onClick={handleNextMonth}>
                                     <ChevronRightIcon />
-                                </button>
+                                </NavigationButton>
                             </>
                         )}
                     </div>
-                </div>
+                </CalendarControls>
 
                 {renderMonths()}
-            </div>
+            </HeatmapContainer>
         </Wrapper>
     );
 };
