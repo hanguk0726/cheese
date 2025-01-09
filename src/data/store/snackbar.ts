@@ -1,5 +1,5 @@
 import { SnackbarSeverity } from '@/model/app';
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 
 class SnackbarStore {
   open: boolean = false;
@@ -11,13 +11,17 @@ class SnackbarStore {
   }
 
   showSnackbar(message: string, severity: SnackbarSeverity = SnackbarSeverity.Info) {
-    this.message = message;
-    this.severity = severity;
-    this.open = true;
+    runInAction(() => {
+      this.message = message;
+      this.severity = severity;
+      this.open = true;
+    })
   }
 
   closeSnackbar() {
-    this.open = false;
+    runInAction(() => {
+      this.open = false;
+    })
   }
 }
 

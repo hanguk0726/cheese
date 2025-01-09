@@ -1,10 +1,11 @@
-import { MonthData } from "./time";
+import { CalendarDate, MonthData } from "./time";
 import { Video } from "./video";
 
 export interface HeatmapViewProps {
     viewMode: 'slide' | 'grid';
-    currentMonthIndex: number;
     mappingField: 'duration' | 'readCount';
+    calendarDate: CalendarDate;
+    setCalendarDate: (date: CalendarDate) => void;
     monthsInYear: MonthData[];
     dailyData: Record<string, { videos: Video[]; totalDuration: number; totalReadCount: number }>;
     setMappingField: (field: 'duration' | 'readCount') => void;
@@ -12,8 +13,6 @@ export interface HeatmapViewProps {
         minYear: number,
         maxYear: number
     };
-    selectedYear: number;
-    setSelectedYear: (year: number) => void;
     handleNextMonth: () => void;
     handlePrevMonth: () => void;
     handleMouseEnter: (date: string) => void;

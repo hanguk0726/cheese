@@ -89,14 +89,13 @@ const heatmapStyles = css`
 
 const HeatmapView: React.FC<HeatmapViewProps> = ({
     viewMode,
-    currentMonthIndex,
     mappingField,
     monthsInYear,
     dailyData,
+    calendarDate,
+    setCalendarDate,
     setMappingField,
     yearBounds,
-    selectedYear,
-    setSelectedYear,
     handleNextMonth,
     handlePrevMonth,
     handleMouseEnter,
@@ -108,7 +107,7 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
     // 월 렌더링
     const renderMonths = () => {
         if (viewMode === 'slide') {
-            const monthData = monthsInYear.find(m => m.month === currentMonthIndex);
+            const monthData = monthsInYear.find(m => m.month === calendarDate.monthIndex);
             return monthData ? renderMonth(monthData, true) : null;
         } else {
             return (
@@ -180,8 +179,11 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
                     <label htmlFor="yearSelector" css={{ marginLeft: '20px', marginRight: '10px' }}>Year:</label>
                     <select
                         id="yearSelector"
-                        value={selectedYear}
-                        onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                        value={calendarDate.year}
+                        onChange={(e) => setCalendarDate({
+                            year: parseInt(e.target.value),
+                            monthIndex: calendarDate.monthIndex
+                        })}
                     >
                         {Array.from({ length: yearBounds.maxYear - yearBounds.minYear + 1 },
                             (_, index) => yearBounds.minYear + index).map((year) => (

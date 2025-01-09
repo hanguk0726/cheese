@@ -6,3 +6,8 @@ export interface MonthData {
         hasData: boolean;
     }[];
 }
+
+export interface CalendarDate {
+    year: number;
+    monthIndex: number;
+}
