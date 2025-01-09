@@ -94,6 +94,7 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
     monthsInYear,
     dailyData,
     setMappingField,
+    yearBounds,
     selectedYear,
     setSelectedYear,
     handleNextMonth,
@@ -111,11 +112,11 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
             return monthData ? renderMonth(monthData, true) : null;
         } else {
             return (
-                <div css={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(3, 1fr)', 
-                    gridTemplateRows: 'repeat(4, 1fr)', 
-                    gap: '15px' 
+                <div css={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gridTemplateRows: 'repeat(4, 1fr)',
+                    gap: '15px'
                 }}>
                     {monthsInYear.slice(0, 12).map(monthData => renderMonth(monthData, false))}
                 </div>
@@ -126,14 +127,14 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
     // 개별 월 렌더링
     const renderMonth = (monthData: MonthData, isSlideMode: boolean) => {
         return (
-            <div 
-                key={monthData.month} 
+            <div
+                key={monthData.month}
                 css={{
                     border: 'none',
                     backgroundColor: 'transparent',
                 }}
             >
-                <h2   css={{ margin: '20px 0' }}>{months[monthData.month]}</h2>
+                <h2 css={{ margin: '20px 0' }}>{months[monthData.month]}</h2>
                 <div className="month-container">
                     {weekdays.map((weekday) => (
                         <div key={weekday} className="weekday-label">{weekday}</div>
@@ -175,22 +176,23 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
                         <option value="duration">Duration</option>
                         <option value="readCount">Read Count</option>
                     </select>
-                    
+
                     <label htmlFor="yearSelector" css={{ marginLeft: '20px', marginRight: '10px' }}>Year:</label>
                     <select
                         id="yearSelector"
                         value={selectedYear}
                         onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                     >
-                        {[2022, 2023, 2024].map((year) => (
-                            <option key={year} value={year}>{year}</option>
-                        ))}
+                        {Array.from({ length: yearBounds.maxYear - yearBounds.minYear + 1 },
+                            (_, index) => yearBounds.minYear + index).map((year) => (
+                                <option key={year} value={year}>{year}</option>
+                            ))}
                     </select>
                 </div>
 
                 <div>
-                    <button 
-                        className="navigation-button" 
+                    <button
+                        className="navigation-button"
                         onClick={toggleViewMode}
                         title={viewMode === 'slide' ? 'Switch to Grid View' : 'Switch to Slide View'}
                     >
@@ -199,14 +201,14 @@ const HeatmapView: React.FC<HeatmapViewProps> = ({
 
                     {viewMode === 'slide' && (
                         <>
-                            <button 
-                                className="navigation-button" 
+                            <button
+                                className="navigation-button"
                                 onClick={handlePrevMonth}
                             >
                                 <ChevronLeftIcon />
                             </button>
-                            <button 
-                                className="navigation-button" 
+                            <button
+                                className="navigation-button"
                                 onClick={handleNextMonth}
                             >
                                 <ChevronRightIcon />

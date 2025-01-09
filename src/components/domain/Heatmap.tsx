@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Video } from '@/model/video';
 import { MonthData } from '@/model/time';
 import HeatmapView from '../layout/Heatmap';
@@ -9,9 +9,12 @@ import videoStore from '@/data/store/video';
 
 const Heatmap = () => {
     const videos = videoStore.videos;
+    // videos.map(video => console.log(JSON.stringify(video)));
     const [mappingField, setMappingField] = useState<'duration' | 'readCount'>('duration');
     const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
     const [currentMonthIndex, setCurrentMonthIndex] = useState<number>(new Date().getMonth());
+    const [minYear, setMinYear] = useState<number>(Infinity);
+    const [maxYear, setMaxYear] = useState<number>(-Infinity);
     const [viewMode, setViewMode] = useState<'slide' | 'grid'>('slide');
     const [hoveredDayData, setHoveredDayData] = useState<{
         date: string,
@@ -58,6 +61,27 @@ const Heatmap = () => {
 
         return map;
     }, [videos]);
+
+    // 최솟년, 최댓년 계산
+    useEffect(() => {
+        let localMinYear = Infinity;  // 최소 연도 초기값
+        let localMaxYear = -Infinity; // 최대 연도 초기값
+
+        Object.keys(dailyData).forEach((date) => {
+            const year = Number(date.split('-')[0]);
+
+            if (year < localMinYear) {
+                localMinYear = year;
+            }
+            if (year > localMaxYear) {
+                localMaxYear = year;
+            }
+        });
+
+        // 최소/최대 연도를 상태에 저장
+        setMinYear(localMinYear);
+        setMaxYear(localMaxYear);
+    }, [dailyData]);  // dailyData가 변경될 때마다 실행
 
     // 월별 데이터 생성
     const monthsInYear = useMemo(() => {
@@ -131,6 +155,7 @@ const Heatmap = () => {
             monthsInYear={monthsInYear}
             dailyData={dailyData}
             setMappingField={setMappingField}
+            yearBounds={{ minYear, maxYear }}
             selectedYear={selectedYear}
             setSelectedYear={setSelectedYear}
             handleNextMonth={handleNextMonth}

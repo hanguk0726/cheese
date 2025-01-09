@@ -8,6 +8,10 @@ export interface HeatmapViewProps {
     monthsInYear: MonthData[];
     dailyData: Record<string, { videos: Video[]; totalDuration: number; totalReadCount: number }>;
     setMappingField: (field: 'duration' | 'readCount') => void;
+    yearBounds: {
+        minYear: number,
+        maxYear: number
+    };
     selectedYear: number;
     setSelectedYear: (year: number) => void;
     handleNextMonth: () => void;
