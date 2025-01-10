@@ -9,7 +9,7 @@ export interface SearchBarViewProps {
     keyword: string;
     setKeyword: (keyword: string) => void;
     placeholder: string;
-    handleSearch: () => void;
+    handleSearch: (keyword: string) => void;
     handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     handleRecentSearchClick: (searchTerm: string) => void;
     handleDeleteRecentSearch: (searchTerm: string) => void;

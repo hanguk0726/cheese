@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { useRef, useEffect } from 'react';
 import { Chart, ChartData, ChartOptions, LineController, LineElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Legend, Filler } from 'chart.js';
-import { formatDate, formatDuration } from '../util/formatTime';
+import { formatDate, formatSeconds } from '../util/time';
 import videoStore from '@/data/store/video';
 import { observer } from 'mobx-react';
 
@@ -103,7 +103,7 @@ const VideoChart = () => {
 
                         // 날짜, 제목, 조회수, 영상 길이 (초)를 각 줄로 분리
                         const formattedDate = formatDate(video.publishDate);
-                        const formattedDuration = formatDuration(tooltipItem.raw as number);
+                        const formattedDuration = formatSeconds(tooltipItem.raw as number);
 
                         result.push(formattedDate); // 날짜
                         result.push(`${tooltipItem.dataset.label}: ${tooltipItem.raw}`); // 조회수

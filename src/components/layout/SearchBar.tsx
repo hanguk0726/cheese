@@ -129,7 +129,7 @@ const SearchBarView: React.FC<SearchBarViewProps> = ({ keyword, setKeyword, plac
           {appStore.isLoading ? (
             <CircularProgress size={24} />
           ) : (
-            <SearchIcon onClick={handleSearch} sx={{ cursor: 'pointer', color: 'gray', fontSize: 28 }} />
+            <SearchIcon onClick={() => handleSearch(keyword)} sx={{ cursor: 'pointer', color: 'gray', fontSize: 28 }} />
           )}
         </SearchButtonWrapper>
       </SearchInputWrapper>

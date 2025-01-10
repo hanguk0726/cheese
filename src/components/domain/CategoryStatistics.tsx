@@ -37,12 +37,12 @@ const CategoryStatisticsTable = () => {
   }, [data, searchQuery, sortColumn, sortDirection]);
 
   const columns: CategoryColumn[] = [
-    { name: 'categoryName', label: 'Game' },
-    { name: 'totalVideos', label: 'Total Videos' },
-    { name: 'totalDuration', label: 'Total Duration' },
-    { name: 'averageDuration', label: 'Avg Duration' },
-    { name: 'totalLivePv', label: 'Total Live PV' },
-    { name: 'averageLivePv', label: 'Avg Live PV' }
+    { name: 'categoryName', label: '게임' },
+    { name: 'totalVideos', label: '총 비디오 수' },
+    { name: 'totalDuration', label: '총 방송 시간' },
+    { name: 'averageDuration', label: '평균 방송 시간' },
+    { name: 'totalLivePv', label: '총 라이브 조회수' },
+    { name: 'averageLivePv', label: '평균 라이브 조회수' }
   ];
 
   if (!videos || videos.length === 0) return <span></span>;//empty
@@ -86,14 +86,13 @@ const computeCategoryStatistics = async (videos: Video[]) => {
     // categoryName과 posterImageUrl을 캐시에 업데이트
     const newCache = { ...categoryImageMap }; // 기존 캐시 복사
     data.forEach((category: { categoryName: string; posterImageUrl: string }) => {
-      console.log(`categoryName ${category.categoryName} to posterImageUrl ${category.posterImageUrl}`);
       newCache[category.categoryName] = category.posterImageUrl; // 캐시 업데이트
     });
 
     saveCache(newCache); // 업데이트된 캐시 저장
 
     console.log("cache updated:", newCache);
-
+    
     return data;
   } catch (error) {
     console.error('카테고리 검색 중 오류:', error);

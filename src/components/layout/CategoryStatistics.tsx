@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
 import { CategoryStatisticsTableViewProps } from '@/model/category';
+import { formatMinutes } from '../util/time';
 
 
 const Wrapper = styled.div`
@@ -13,13 +14,14 @@ const Wrapper = styled.div`
 `;
 
 const TableContainer = styled.div`
+  width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  min-width: 800px; // 테이블의 최소 너비 설정
 `;
 
 const Table = styled.table`
   width: 100%;
-  min-width: 800px; // 테이블의 최소 너비 설정
   border-collapse: collapse;
 
   th {
@@ -56,6 +58,10 @@ const SearchInput = styled.input`
   border: 1px solid #ddd;
   border-radius: 4px;
   margin-bottom: 1rem;
+
+  @media (max-width: 768px) {
+    width: 90%;
+  }
 `;
 
 const TableHeader = ({ columnName, onClickColumn }: { columnName: string, onClickColumn: () => void }) => {
@@ -68,7 +74,7 @@ const TableHeader = ({ columnName, onClickColumn }: { columnName: string, onClic
   );
 };
 
-const CategoryStatisticsTableView : React.FC<CategoryStatisticsTableViewProps> = ({ searchQuery, onChangeSearchQuery, data, columns, onClickColumn }) => {
+const CategoryStatisticsTableView: React.FC<CategoryStatisticsTableViewProps> = ({ searchQuery, onChangeSearchQuery, data, columns, onClickColumn }) => {
   return (
     <Wrapper>
       <SearchInput
@@ -95,8 +101,8 @@ const CategoryStatisticsTableView : React.FC<CategoryStatisticsTableViewProps> =
                     {item.categoryValue}
                   </td>
                   <td>{item.totalVideos.toLocaleString()}</td>
-                  <td>{item.totalDuration.toLocaleString()}</td>
-                  <td>{Math.round(item.averageDuration)}</td>
+                  <td>{formatMinutes(item.totalDuration)}</td>
+                  <td>{formatMinutes(Math.round(item.averageDuration))}</td>
                   <td>{item.totalLivePv.toLocaleString()}</td>
                   <td>{Math.round(item.averageLivePv)}</td>
                 </tr>

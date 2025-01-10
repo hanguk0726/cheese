@@ -47,29 +47,16 @@ const SearchBar = () => {
       setRecentSearches(newSearches);
       localStorage.setItem('recentSearches', JSON.stringify(newSearches));
     } catch (error) {
-      console.error('비디오 검색 중 오류:', error);
+      snackbarStore.showSnackbar('검색 결과가 없습니다.', SnackbarSeverity.Info);
+      // console.error('비디오 검색 중 오류:', error);
     } finally {
       appStore.setLoading(false);
     }
   });
 
-
-  const handleSearch = () => {
-    if (!keyword || keyword.trim() === '') {
-      snackbarStore.showSnackbar('검색어를 입력해주세요.', SnackbarSeverity.Info);
-      return
-    };
-    searchVideos(keyword);
-
-    // Add to recent searches
-    const newSearches = [keyword, ...recentSearches.filter(k => k !== keyword)].slice(0, 5);
-    setRecentSearches(newSearches);
-    localStorage.setItem('recentSearches', JSON.stringify(newSearches));
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      handleSearch();
+      searchVideos(keyword);
     }
   };
 
@@ -79,7 +66,7 @@ const SearchBar = () => {
   };
 
   const handleDeleteRecentSearch = (searchTerm: string) => {
-    const updatedSearches = recentSearches.filter(search => search !== searchTerm);
+    const updatedSearches = recentSearches.filter(search => search !== searchTerm).slice(0, 5);
     setRecentSearches(updatedSearches);
     localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
   };
@@ -89,7 +76,7 @@ const SearchBar = () => {
       keyword={keyword}
       setKeyword={setKeyword}
       placeholder={dynamicPlaceholder}
-      handleSearch={handleSearch}
+      handleSearch={searchVideos}
       handleKeyDown={handleKeyDown}
       handleRecentSearchClick={handleRecentSearchClick}
       handleDeleteRecentSearch={handleDeleteRecentSearch}
